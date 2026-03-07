@@ -13,15 +13,28 @@ import {
   Input,
   Label,
   Row,
+  StockSection,
+  StockToggle,
   SubmitButton,
   Textarea,
+  TypeButton,
+  TypeToggle,
 } from './ItemForm.styles';
 import {
   itemSchema,
   type FormErrors,
   type FormValues,
   type ItemFormProps,
+  type StockFormState,
 } from './ItemForm.types';
+
+const initialStock = (initial?: ItemFormProps['initial']): StockFormState => ({
+  enabled: !!initial?.stock,
+  type: initial?.stock?.type ?? 'units',
+  quantity: String(initial?.stock?.quantity ?? ''),
+  unitsPerPackage: String(initial?.stock?.unitsPerPackage ?? ''),
+  unitsRemaining: String(initial?.stock?.unitsRemaining ?? ''),
+});
 
 export function ItemForm({ initial }: ItemFormProps) {
   const router = useRouter();
@@ -39,6 +52,7 @@ export function ItemForm({ initial }: ItemFormProps) {
     category: initial?.category ?? '',
   });
   const [imageUrl, setImageUrl] = useState<string | undefined>(initial?.imageUrl);
+  const [stock, setStock] = useState<StockFormState>(initialStock(initial));
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitError, setSubmitError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,6 +65,22 @@ export function ItemForm({ initial }: ItemFormProps) {
       setValues((v) => ({ ...v, [field]: value }));
     }
     setErrors((e) => ({ ...e, [field]: undefined }));
+  };
+
+  const buildStock = () => {
+    if (!stock.enabled) return undefined;
+    const quantity = parseInt(stock.quantity, 10);
+    if (isNaN(quantity)) return undefined;
+    return {
+      type: stock.type,
+      quantity,
+      ...(stock.type === 'packages' && stock.unitsPerPackage
+        ? { unitsPerPackage: parseInt(stock.unitsPerPackage, 10) }
+        : {}),
+      ...(stock.type === 'packages' && stock.unitsRemaining
+        ? { unitsRemaining: parseInt(stock.unitsRemaining, 10) }
+        : {}),
+    };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,6 +108,7 @@ export function ItemForm({ initial }: ItemFormProps) {
         .filter(Boolean),
       category: result.data.category,
       imageUrl,
+      stock: buildStock(),
     };
 
     setIsSubmitting(true);
@@ -172,6 +203,92 @@ export function ItemForm({ initial }: ItemFormProps) {
           placeholder="Herramientas, Electrónica, Cocina…"
         />
       </Field>
+
+      <StockSection>
+        <StockToggle>
+          <input
+            type="checkbox"
+            checked={stock.enabled}
+            onChange={(e) => setStock((s) => ({ ...s, enabled: e.target.checked }))}
+          />
+          Llevar control de stock
+        </StockToggle>
+
+        {stock.enabled && (
+          <>
+            <TypeToggle>
+              <TypeButton
+                type="button"
+                $active={stock.type === 'units'}
+                onClick={() => setStock((s) => ({ ...s, type: 'units' }))}
+              >
+                Unidades
+              </TypeButton>
+              <TypeButton
+                type="button"
+                $active={stock.type === 'packages'}
+                onClick={() => setStock((s) => ({ ...s, type: 'packages' }))}
+              >
+                Paquetes
+              </TypeButton>
+            </TypeToggle>
+
+            {stock.type === 'units' && (
+              <Field>
+                <Label htmlFor="stock-qty">Cantidad de unidades</Label>
+                <Input
+                  id="stock-qty"
+                  type="number"
+                  min="0"
+                  value={stock.quantity}
+                  onChange={(e) => setStock((s) => ({ ...s, quantity: e.target.value }))}
+                  placeholder="3"
+                />
+              </Field>
+            )}
+
+            {stock.type === 'packages' && (
+              <>
+                <Field>
+                  <Label htmlFor="stock-pkgs">Número de paquetes</Label>
+                  <Input
+                    id="stock-pkgs"
+                    type="number"
+                    min="0"
+                    value={stock.quantity}
+                    onChange={(e) => setStock((s) => ({ ...s, quantity: e.target.value }))}
+                    placeholder="2"
+                  />
+                </Field>
+                <Row>
+                  <Field>
+                    <Label htmlFor="stock-upp">Unidades por paquete</Label>
+                    <Input
+                      id="stock-upp"
+                      type="number"
+                      min="1"
+                      value={stock.unitsPerPackage}
+                      onChange={(e) => setStock((s) => ({ ...s, unitsPerPackage: e.target.value }))}
+                      placeholder="12"
+                    />
+                  </Field>
+                  <Field>
+                    <Label htmlFor="stock-rem">Unidades restantes (paquete abierto)</Label>
+                    <Input
+                      id="stock-rem"
+                      type="number"
+                      min="0"
+                      value={stock.unitsRemaining}
+                      onChange={(e) => setStock((s) => ({ ...s, unitsRemaining: e.target.value }))}
+                      placeholder="7"
+                    />
+                  </Field>
+                </Row>
+              </>
+            )}
+          </>
+        )}
+      </StockSection>
 
       <Field>
         <Label>Foto (opcional)</Label>

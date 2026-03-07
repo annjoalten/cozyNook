@@ -108,6 +108,32 @@ const NotFound = styled.p`
   color: ${({ theme }) => theme.colors.taupe};
 `;
 
+const StockBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  border-radius: ${({ theme }) => theme.radii.md};
+  background: ${({ theme }) => theme.colors.parchment};
+  border: 1.5px solid ${({ theme }) => theme.colors.cream};
+`;
+
+const StockLabel = styled.span`
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  font-weight: ${({ theme }) => theme.fontWeight.medium};
+  color: ${({ theme }) => theme.colors.taupe};
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+`;
+
+const StockValue = styled.span<{ $low?: boolean }>`
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.base};
+  font-weight: ${({ theme }) => theme.fontWeight.medium};
+  color: ${({ $low, theme }) => ($low ? theme.colors.terracotta : theme.colors.bark)};
+`;
+
 export default function ItemDetailPage() {
   useLoadItems();
 
@@ -166,6 +192,24 @@ export default function ItemDetailPage() {
             ))}
           </Tags>
         )}
+        {item.stock && (() => {
+          const s = item.stock;
+          const isLow = s.quantity <= 1;
+          const lines: string[] = [];
+          if (s.type === 'units') {
+            lines.push(`${s.quantity} unidad${s.quantity !== 1 ? 'es' : ''}`);
+          } else {
+            lines.push(`${s.quantity} paquete${s.quantity !== 1 ? 's' : ''}`);
+            if (s.unitsPerPackage) lines.push(`${s.unitsPerPackage} unidades por paquete`);
+            if (s.unitsRemaining !== undefined) lines.push(`${s.unitsRemaining} unidades restantes (paquete abierto)`);
+          }
+          return (
+            <StockBlock>
+              <StockLabel>Stock{isLow ? ' · ⚠ Queda poco' : ''}</StockLabel>
+              {lines.map((l) => <StockValue key={l} $low={isLow}>{l}</StockValue>)}
+            </StockBlock>
+          );
+        })()}
         <Actions>
           <ActionButton
             onClick={() =>

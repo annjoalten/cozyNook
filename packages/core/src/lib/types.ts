@@ -1,3 +1,10 @@
+export interface StockInfo {
+  type: 'units' | 'packages';
+  quantity: number;
+  unitsPerPackage?: number;
+  unitsRemaining?: number;
+}
+
 export interface Item {
   id: string;
   name: string;
@@ -9,6 +16,7 @@ export interface Item {
   tags: string[];
   category?: string;
   imageUrl?: string;
+  stock?: StockInfo;
   createdAt: string;
 }
 

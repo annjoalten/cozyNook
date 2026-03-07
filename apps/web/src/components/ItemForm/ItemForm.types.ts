@@ -15,6 +15,16 @@ export const itemSchema = z.object({
 export type FormValues = z.infer<typeof itemSchema>
 export type FormErrors = Partial<Record<keyof FormValues | 'location.room' | 'location.spot', string>>
 
+export type StockType = 'units' | 'packages'
+
+export interface StockFormState {
+  enabled: boolean;
+  type: StockType;
+  quantity: string;
+  unitsPerPackage: string;
+  unitsRemaining: string;
+}
+
 export interface ItemFormProps {
   initial?: Item
 }

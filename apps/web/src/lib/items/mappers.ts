@@ -1,4 +1,4 @@
-import type { Item } from '@nook/core';
+import type { Item, StockInfo } from '@nook/core';
 
 export interface DbItemRow {
   id: string;
@@ -9,6 +9,7 @@ export interface DbItemRow {
   tags: string[] | null;
   category: string | null;
   image_url: string | null;
+  stock: StockInfo | null;
   created_at: string;
 }
 
@@ -24,6 +25,7 @@ export function dbItemToItem(row: DbItemRow): Item {
     tags: row.tags ?? [],
     category: row.category ?? undefined,
     imageUrl: row.image_url ?? undefined,
+    stock: row.stock ?? undefined,
     createdAt: row.created_at,
   };
 }
@@ -37,6 +39,7 @@ export function itemToDbInsert(item: Omit<Item, 'id' | 'createdAt'>) {
     tags: item.tags,
     category: item.category ?? null,
     image_url: item.imageUrl ?? null,
+    stock: item.stock ?? null,
   };
 }
 
@@ -47,6 +50,7 @@ type PatchInput = {
   tags?: string[];
   category?: string | null;
   imageUrl?: string | null;
+  stock?: StockInfo | null;
 };
 
 export function itemPatchToDbUpdate(patch: PatchInput) {
@@ -60,6 +64,7 @@ export function itemPatchToDbUpdate(patch: PatchInput) {
   if (patch.tags !== undefined) payload.tags = patch.tags;
   if (patch.category !== undefined) payload.category = patch.category ?? null;
   if (patch.imageUrl !== undefined) payload.image_url = patch.imageUrl ?? null;
+  if (patch.stock !== undefined) payload.stock = patch.stock ?? null;
 
   return payload;
 }

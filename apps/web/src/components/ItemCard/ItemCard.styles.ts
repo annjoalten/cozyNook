@@ -57,3 +57,20 @@ export const MoreTag = styled.span`
   border: 1px dashed ${({ theme }) => theme.colors.sand};
   color: ${({ theme }) => theme.colors.taupe};
 `
+
+export const StockBadge = styled.span<{ $low?: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: ${({ theme }) => theme.radii.full};
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  font-weight: ${({ theme }) => theme.fontWeight.medium};
+  background: ${({ $low, theme }) =>
+    $low ? theme.colors.terracotta + '18' : theme.colors.olive + '15'};
+  color: ${({ $low, theme }) =>
+    $low ? theme.colors.terracotta : theme.colors.olive};
+  border: 1px solid ${({ $low, theme }) =>
+    $low ? theme.colors.terracotta + '40' : theme.colors.olive + '40'};
+`
