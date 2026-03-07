@@ -1,4 +1,5 @@
 export const colors = {
+  white: '#ffffff',
   parchment: '#F5F0E8',
   cream: '#D9CDBF',
   taupe: '#A6998A',

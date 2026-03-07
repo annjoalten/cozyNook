@@ -1,6 +1,12 @@
 import type { Item } from '@nook/core';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { useUIStore } from './uiStore';
+
+const toast = {
+  success: (msg: string) => useUIStore.getState().addToast(msg, 'success'),
+  error: (msg: string) => useUIStore.getState().addToast(msg, 'error'),
+};
 
 interface ItemState {
   items: Item[];
@@ -71,16 +77,13 @@ export const useItemStore = create<ItemState>()(
             false,
             'addItem:success',
           );
+          toast.success('Objeto añadido correctamente');
           return created;
         } catch (error) {
-          set(
-            {
-              error:
-                error instanceof Error ? error.message : 'Error creando objeto',
-            },
-            false,
-            'addItem:error',
-          );
+          const msg =
+            error instanceof Error ? error.message : 'Error creando objeto';
+          set({ error: msg }, false, 'addItem:error');
+          toast.error(msg);
           return null;
         }
       },
@@ -108,18 +111,15 @@ export const useItemStore = create<ItemState>()(
             false,
             'updateItem:success',
           );
+          toast.success('Cambios guardados');
           return updated;
         } catch (error) {
-          set(
-            {
-              error:
-                error instanceof Error
-                  ? error.message
-                  : 'Error actualizando objeto',
-            },
-            false,
-            'updateItem:error',
-          );
+          const msg =
+            error instanceof Error
+              ? error.message
+              : 'Error actualizando objeto';
+          set({ error: msg }, false, 'updateItem:error');
+          toast.error(msg);
           return null;
         }
       },
@@ -142,18 +142,15 @@ export const useItemStore = create<ItemState>()(
             false,
             'deleteItem:success',
           );
+          toast.success('Objeto eliminado');
           return true;
         } catch (error) {
-          set(
-            {
-              error:
-                error instanceof Error
-                  ? error.message
-                  : 'Error eliminando objeto',
-            },
-            false,
-            'deleteItem:error',
-          );
+          const msg =
+            error instanceof Error
+              ? error.message
+              : 'Error eliminando objeto';
+          set({ error: msg }, false, 'deleteItem:error');
+          toast.error(msg);
           return false;
         }
       },

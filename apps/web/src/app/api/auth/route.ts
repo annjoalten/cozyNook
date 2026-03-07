@@ -1,7 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit } from '../../../lib/rateLimit';
+
+// 5 intentos por 15 minutos por IP
+const RATE_LIMIT = { limit: 5, windowMs: 15 * 60 * 1000 };
 
 export async function POST(request: NextRequest) {
-  const { password } = await request.json();
+  const ip =
+    request.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
+    request.headers.get('x-real-ip') ??
+    'unknown';
+
+  const rl = rateLimit(`auth:${ip}`, RATE_LIMIT);
+
+  if (!rl.allowed) {
+    const retryAfterSec = Math.ceil((rl.resetAt - Date.now()) / 1000);
+    return NextResponse.json(
+      { error: 'Demasiados intentos. Espera un momento.' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(retryAfterSec),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': String(rl.resetAt),
+        },
+      },
+    );
+  }
+
+  const body = await request.json().catch(() => null);
+  const password = typeof body?.password === 'string' ? body.password : '';
 
   const expected = process.env.NOOK_PASSWORD;
   if (!expected) {

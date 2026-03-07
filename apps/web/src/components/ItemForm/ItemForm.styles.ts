@@ -5,7 +5,7 @@ const inputBase = css`
   font-family: ${({ theme }) => theme.fontFamily.body};
   font-size: ${({ theme }) => theme.fontSize.base};
   color: ${({ theme }) => theme.colors.bark};
-  background: #fff;
+  background: ${({ theme }) => theme.colors.white};
   border: 1.5px solid ${({ theme }) => theme.colors.cream};
   border-radius: ${({ theme }) => theme.radii.md};
   outline: none;
@@ -42,11 +42,6 @@ export const Textarea = styled.textarea`
   ${inputBase}
   resize: vertical;
   min-height: 5rem;
-`
-
-export const Select = styled.select`
-  ${inputBase}
-  cursor: pointer;
 `
 
 export const ErrorMsg = styled.span`

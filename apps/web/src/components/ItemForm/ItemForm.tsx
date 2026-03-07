@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useItemStore } from '../../store/itemStore';
+import { ImageUpload } from '../ImageUpload';
 import { RoomDropdown } from '../RoomDropdown';
 import {
   ErrorMsg,
@@ -37,6 +38,7 @@ export function ItemForm({ initial }: ItemFormProps) {
     tags: initial?.tags.join(', ') ?? '',
     category: initial?.category ?? '',
   });
+  const [imageUrl, setImageUrl] = useState<string | undefined>(initial?.imageUrl);
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitError, setSubmitError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,6 +77,7 @@ export function ItemForm({ initial }: ItemFormProps) {
         .map((t) => t.trim())
         .filter(Boolean),
       category: result.data.category,
+      imageUrl,
     };
 
     setIsSubmitting(true);
@@ -168,6 +171,11 @@ export function ItemForm({ initial }: ItemFormProps) {
           onChange={(e) => set('category', e.target.value)}
           placeholder="Herramientas, Electrónica, Cocina…"
         />
+      </Field>
+
+      <Field>
+        <Label>Foto (opcional)</Label>
+        <ImageUpload value={imageUrl} onChange={setImageUrl} />
       </Field>
 
       {submitError && <ErrorMsg>{submitError}</ErrorMsg>}

@@ -10,11 +10,6 @@ export const Wrapper = styled.div`
   gap: 0.75rem;
 `
 
-export const Emoji = styled.p`
-  font-size: 2.5rem;
-  line-height: 1;
-`
-
 export const Title = styled.p`
   font-family: ${({ theme }) => theme.fontFamily.heading};
   font-size: ${({ theme }) => theme.fontSize.xl};

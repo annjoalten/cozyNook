@@ -1,26 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  dbItemToItem,
-  itemToDbInsert,
-  type DbItemRow,
-} from '../../../lib/items/mappers';
-import { itemCreateSchema } from '../../../lib/items/schemas';
+import { z } from 'zod';
 import { getSupabaseAdmin } from '../../../lib/supabase/admin';
+
+const roomCreateSchema = z.object({
+  name: z.string().min(1, 'El nombre es obligatorio').max(100),
+});
 
 export async function GET() {
   try {
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
-      .from('items')
+      .from('rooms')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('name', { ascending: true });
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const rows = (data ?? []) as DbItemRow[];
-    return NextResponse.json(rows.map(dbItemToItem));
+    return NextResponse.json(data ?? []);
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal error' },
@@ -32,7 +30,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => null);
-    const parsed = itemCreateSchema.safeParse(body);
+    const parsed = roomCreateSchema.safeParse(body);
 
     if (!parsed.success) {
       return NextResponse.json(
@@ -43,16 +41,23 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
-      .from('items')
-      .insert(itemToDbInsert(parsed.data))
+      .from('rooms')
+      .insert({ name: parsed.data.name })
       .select('*')
       .single();
 
     if (error) {
+      // Duplicate name (unique constraint)
+      if (error.code === '23505') {
+        return NextResponse.json(
+          { error: 'Ya existe una habitación con ese nombre' },
+          { status: 409 },
+        );
+      }
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(dbItemToItem(data as DbItemRow), { status: 201 });
+    return NextResponse.json(data, { status: 201 });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal error' },

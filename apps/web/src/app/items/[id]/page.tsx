@@ -3,9 +3,12 @@
 import { ArrowLeft, PencilSimple, Trash } from '@phosphor-icons/react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
 import styled from 'styled-components';
+import { ConfirmDialog } from '../../../components/ConfirmDialog';
 import { ItemForm } from '../../../components/ItemForm';
 import { LocationBreadcrumb } from '../../../components/LocationBreadcrumb';
+import { ItemDetailSkeleton } from '../../../components/Skeleton';
 import { TagBadge } from '../../../components/TagBadge';
 import { useLoadItems } from '../../../hooks/useLoadItems';
 import { useItemStore } from '../../../store/itemStore';
@@ -32,7 +35,7 @@ const Back = styled(Link)`
 `;
 
 const Card = styled.div`
-  background: #fff;
+  background: ${({ theme }) => theme.colors.white};
   border-radius: ${({ theme }) => theme.radii.xl};
   box-shadow: ${({ theme }) => theme.shadow.card};
   padding: 1.75rem;
@@ -113,19 +116,13 @@ export default function ItemDetailPage() {
   const getItemById = useItemStore((s) => s.getItemById);
   const deleteItem = useItemStore((s) => s.deleteItem);
   const hasLoaded = useItemStore((s) => s.hasLoaded);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const item = getItemById(id);
 
   if (!hasLoaded) {
-    return (
-      <Page>
-        <Back href="/items">
-          <ArrowLeft size={16} weight="light" />
-          Volver
-        </Back>
-        <NotFound>Cargando objeto...</NotFound>
-      </Page>
-    );
+    return <ItemDetailSkeleton />;
   }
 
   if (!item) {
@@ -140,13 +137,12 @@ export default function ItemDetailPage() {
     );
   }
 
-  const handleDelete = async () => {
-    if (window.confirm(`¿Eliminar "${item.name}"?`)) {
-      const ok = await deleteItem(id);
-      if (ok) {
-        router.push('/items');
-      }
-    }
+  const handleDeleteConfirm = async () => {
+    setDeleting(true);
+    const ok = await deleteItem(id);
+    setDeleting(false);
+    setConfirmOpen(false);
+    if (ok) router.push('/items');
   };
 
   return (
@@ -181,7 +177,7 @@ export default function ItemDetailPage() {
             <PencilSimple size={15} weight="light" />
             Editar
           </ActionButton>
-          <ActionButton $danger onClick={handleDelete}>
+          <ActionButton $danger onClick={() => setConfirmOpen(true)}>
             <Trash size={15} weight="light" />
             Eliminar
           </ActionButton>
@@ -190,6 +186,16 @@ export default function ItemDetailPage() {
 
       <EditTitle id="edit-form">Editar objeto</EditTitle>
       <ItemForm initial={item} />
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title={`¿Eliminar "${item.name}"?`}
+        description="Esta acción no se puede deshacer."
+        confirmLabel="Eliminar"
+        loading={deleting}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </Page>
   );
 }

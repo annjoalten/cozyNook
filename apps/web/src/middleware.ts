@@ -3,6 +3,10 @@ import { NextRequest, NextResponse } from 'next/server'
 const PUBLIC_PATHS = ['/login', '/api/auth']
 
 export function middleware(request: NextRequest) {
+  if (!process.env.NOOK_PASSWORD) {
+    return NextResponse.next()
+  }
+
   const { pathname } = request.nextUrl
 
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {

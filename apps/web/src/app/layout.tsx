@@ -1,4 +1,6 @@
 import { Lora, DM_Sans } from 'next/font/google'
+import { ErrorBoundary } from '../components/ErrorBoundary'
+import { ToastContainer } from '../components/ToastContainer'
 import { StyledComponentsRegistry } from '../lib/registry'
 import { ThemeProvider } from '../lib/ThemeProvider'
 import './global.css'
@@ -25,7 +27,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es" className={`${lora.variable} ${dmSans.variable}`}>
       <body>
         <StyledComponentsRegistry>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
+            <ToastContainer />
+          </ThemeProvider>
         </StyledComponentsRegistry>
       </body>
     </html>

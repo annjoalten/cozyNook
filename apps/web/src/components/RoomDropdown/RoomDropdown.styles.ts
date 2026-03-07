@@ -15,7 +15,7 @@ export const Trigger = styled.button<{ $hasValue: boolean }>`
   font-size: ${({ theme }) => theme.fontSize.base};
   color: ${({ $hasValue, theme }) =>
     $hasValue ? theme.colors.bark : theme.colors.taupe};
-  background: #fff;
+  background: ${({ theme }) => theme.colors.white};
   border: 1.5px solid ${({ theme }) => theme.colors.cream};
   border-radius: ${({ theme }) => theme.radii.md};
   cursor: pointer;
@@ -33,7 +33,7 @@ export const Panel = styled.div`
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  background: #fff;
+  background: ${({ theme }) => theme.colors.white};
   border: 1.5px solid ${({ theme }) => theme.colors.cream};
   border-radius: ${({ theme }) => theme.radii.md};
   box-shadow: ${({ theme }) => theme.shadow.card};

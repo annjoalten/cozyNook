@@ -6,7 +6,7 @@ export const Card = styled(Link)`
   flex-direction: column;
   gap: 0.75rem;
   padding: 1.25rem;
-  background: #fff;
+  background: ${({ theme }) => theme.colors.white};
   border-radius: ${({ theme }) => theme.radii.xl};
   box-shadow: ${({ theme }) => theme.shadow.card};
   text-decoration: none;
