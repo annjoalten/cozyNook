@@ -286,9 +286,15 @@ export default function RoomsPage() {
       count: itemCounts.get(name) ?? 0,
       meta: roomByName.get(name),
     }))
-    .sort((a, b) =>
-      a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }),
-    );
+    .sort((a, b) => {
+      const aIsOther = a.name.trim().toLowerCase() === 'otro';
+      const bIsOther = b.name.trim().toLowerCase() === 'otro';
+
+      if (aIsOther && !bIsOther) return 1;
+      if (!aIsOther && bIsOther) return -1;
+
+      return a.name.localeCompare(b.name, 'es', { sensitivity: 'base' });
+    });
 
   const openCreateModal = () => {
     setEditingRoomId(null);
