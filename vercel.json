@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npx nx build web",
-  "installCommand": "npm install",
+  "buildCommand": "pnpm nx build web",
+  "installCommand": "pnpm install --frozen-lockfile",
   "framework": "nextjs"
 }

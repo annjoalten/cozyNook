@@ -2,15 +2,22 @@
   "name": "nook",
   "version": "0.0.0",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "packageManager": "pnpm@10.10.0",
   "scripts": {
-    "dev": "nx serve web",
+    "dev": "nx dev web",
     "build": "nx build web",
     "lint": "nx run-many -t lint",
     "test": "nx run-many -t test"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "@swc/core",
+      "core-js-pure",
+      "esbuild",
+      "nx",
+      "sharp"
+    ]
   },
   "devDependencies": {
     "@nx/js": "22.5.4",
@@ -42,7 +49,7 @@
     "@supabase/supabase-js": "^2.98.0",
     "framer-motion": "^12.35.0",
     "fuse.js": "^7.1.0",
-    "next": "~16.0.1",
+    "next": "~16.1.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "styled-components": "^6.3.11",
