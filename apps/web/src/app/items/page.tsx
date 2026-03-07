@@ -291,7 +291,7 @@ export default function ItemsPage() {
 
           <AddButton href="/items/new">
             <PlusIcon size={16} weight="light" />
-            Añadir objeto
+            Añadir
           </AddButton>
         </Actions>
       </Header>

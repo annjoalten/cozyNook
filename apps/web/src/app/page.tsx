@@ -122,7 +122,7 @@ export default function HomePage() {
         </Subtitle>
         <AddButton href="/items/new">
           <Plus size={16} weight="light" />
-          Añadir objeto
+          Añadir
         </AddButton>
       </Hero>
 

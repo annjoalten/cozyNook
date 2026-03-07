@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, PencilSimple, Trash } from '@phosphor-icons/react';
+import { ArrowLeft, Trash } from '@phosphor-icons/react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -11,6 +11,7 @@ import { LocationBreadcrumb } from '../../../components/LocationBreadcrumb';
 import { ItemDetailSkeleton } from '../../../components/Skeleton';
 import { TagBadge } from '../../../components/TagBadge';
 import { useLoadItems } from '../../../hooks/useLoadItems';
+import { isLowStock } from '../../../lib/stock';
 import { useItemStore } from '../../../store/itemStore';
 
 const Page = styled.main`
@@ -131,7 +132,8 @@ const StockValue = styled.span<{ $low?: boolean }>`
   font-family: ${({ theme }) => theme.fontFamily.body};
   font-size: ${({ theme }) => theme.fontSize.base};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
-  color: ${({ $low, theme }) => ($low ? theme.colors.terracotta : theme.colors.bark)};
+  color: ${({ $low, theme }) =>
+    $low ? theme.colors.terracotta : theme.colors.bark};
 `;
 
 export default function ItemDetailPage() {
@@ -192,35 +194,34 @@ export default function ItemDetailPage() {
             ))}
           </Tags>
         )}
-        {item.stock && (() => {
-          const s = item.stock;
-          const isLow = s.quantity <= 1;
-          const lines: string[] = [];
-          if (s.type === 'units') {
-            lines.push(`${s.quantity} unidad${s.quantity !== 1 ? 'es' : ''}`);
-          } else {
-            lines.push(`${s.quantity} paquete${s.quantity !== 1 ? 's' : ''}`);
-            if (s.unitsPerPackage) lines.push(`${s.unitsPerPackage} unidades por paquete`);
-            if (s.unitsRemaining !== undefined) lines.push(`${s.unitsRemaining} unidades restantes (paquete abierto)`);
-          }
-          return (
-            <StockBlock>
-              <StockLabel>Stock{isLow ? ' · ⚠ Queda poco' : ''}</StockLabel>
-              {lines.map((l) => <StockValue key={l} $low={isLow}>{l}</StockValue>)}
-            </StockBlock>
-          );
-        })()}
-        <Actions>
-          <ActionButton
-            onClick={() =>
-              document
-                .getElementById('edit-form')
-                ?.scrollIntoView({ behavior: 'smooth' })
+        {item.stock &&
+          (() => {
+            const s = item.stock;
+            const isLow = isLowStock(s);
+            const lines: string[] = [];
+            if (s.type === 'units') {
+              lines.push(`${s.quantity} unidad${s.quantity !== 1 ? 'es' : ''}`);
+            } else {
+              lines.push(`${s.quantity} paquete${s.quantity !== 1 ? 's' : ''}`);
+              if (s.unitsPerPackage)
+                lines.push(`${s.unitsPerPackage} unidades por paquete`);
+              if (s.unitsRemaining !== undefined)
+                lines.push(
+                  `${s.unitsRemaining} unidades restantes (paquete abierto)`,
+                );
             }
-          >
-            <PencilSimple size={15} weight="light" />
-            Editar
-          </ActionButton>
+            return (
+              <StockBlock>
+                <StockLabel>Stock{isLow ? ' · ⚠ Queda poco' : ''}</StockLabel>
+                {lines.map((l) => (
+                  <StockValue key={l} $low={isLow}>
+                    {l}
+                  </StockValue>
+                ))}
+              </StockBlock>
+            );
+          })()}
+        <Actions>
           <ActionButton $danger onClick={() => setConfirmOpen(true)}>
             <Trash size={15} weight="light" />
             Eliminar

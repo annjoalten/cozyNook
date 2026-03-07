@@ -1,9 +1,9 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import styled from 'styled-components'
-import { ArrowLeft } from '@phosphor-icons/react'
-import { ItemForm } from '../../../components/ItemForm'
+import { ArrowLeft } from '@phosphor-icons/react';
+import Link from 'next/link';
+import styled from 'styled-components';
+import { ItemForm } from '../../../components/ItemForm';
 
 const Page = styled.main`
   max-width: 40rem;
@@ -12,7 +12,7 @@ const Page = styled.main`
   display: flex;
   flex-direction: column;
   gap: 2rem;
-`
+`;
 
 const Back = styled(Link)`
   display: inline-flex;
@@ -21,14 +21,16 @@ const Back = styled(Link)`
   font-family: ${({ theme }) => theme.fontFamily.body};
   font-size: ${({ theme }) => theme.fontSize.sm};
   color: ${({ theme }) => theme.colors.taupe};
-  &:hover { color: ${({ theme }) => theme.colors.bark}; }
-`
+  &:hover {
+    color: ${({ theme }) => theme.colors.bark};
+  }
+`;
 
 const Title = styled.h1`
   font-family: ${({ theme }) => theme.fontFamily.heading};
   font-size: ${({ theme }) => theme.fontSize['2xl']};
   color: ${({ theme }) => theme.colors.bark};
-`
+`;
 
 export default function NewItemPage() {
   return (
@@ -37,8 +39,8 @@ export default function NewItemPage() {
         <ArrowLeft size={16} weight="light" />
         Volver al inventario
       </Back>
-      <Title>Añadir objeto</Title>
+      <Title>Añadir</Title>
       <ItemForm />
     </Page>
-  )
+  );
 }

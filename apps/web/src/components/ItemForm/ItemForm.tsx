@@ -57,15 +57,19 @@ export function ItemForm({ initial }: ItemFormProps) {
   });
   const spotSuggestions = useMemo(() => {
     if (!values.location.room) return [];
-    return [...new Set(
-      items
-        .filter((i) => i.location.room === values.location.room)
-        .map((i) => i.location.spot)
-        .filter(Boolean),
-    )];
+    return [
+      ...new Set(
+        items
+          .filter((i) => i.location.room === values.location.room)
+          .map((i) => i.location.spot)
+          .filter(Boolean),
+      ),
+    ];
   }, [items, values.location.room]);
 
-  const [imageUrl, setImageUrl] = useState<string | undefined>(initial?.imageUrl);
+  const [imageUrl, setImageUrl] = useState<string | undefined>(
+    initial?.imageUrl,
+  );
   const [stock, setStock] = useState<StockFormState>(initialStock(initial));
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitError, setSubmitError] = useState('');
@@ -231,7 +235,19 @@ export function ItemForm({ initial }: ItemFormProps) {
           <input
             type="checkbox"
             checked={stock.enabled}
-            onChange={(e) => setStock((s) => ({ ...s, enabled: e.target.checked }))}
+            onChange={(e) => {
+              if (e.target.checked) {
+                setStock((s) => ({ ...s, enabled: true }));
+              } else {
+                setStock({
+                  enabled: false,
+                  type: 'units',
+                  quantity: '',
+                  unitsPerPackage: '',
+                  unitsRemaining: '',
+                });
+              }
+            }}
           />
           Llevar control de stock
         </StockToggle>
@@ -263,7 +279,9 @@ export function ItemForm({ initial }: ItemFormProps) {
                   type="number"
                   min="0"
                   value={stock.quantity}
-                  onChange={(e) => setStock((s) => ({ ...s, quantity: e.target.value }))}
+                  onChange={(e) =>
+                    setStock((s) => ({ ...s, quantity: e.target.value }))
+                  }
                   placeholder="3"
                 />
               </Field>
@@ -278,7 +296,9 @@ export function ItemForm({ initial }: ItemFormProps) {
                     type="number"
                     min="0"
                     value={stock.quantity}
-                    onChange={(e) => setStock((s) => ({ ...s, quantity: e.target.value }))}
+                    onChange={(e) =>
+                      setStock((s) => ({ ...s, quantity: e.target.value }))
+                    }
                     placeholder="2"
                   />
                 </Field>
@@ -290,18 +310,30 @@ export function ItemForm({ initial }: ItemFormProps) {
                       type="number"
                       min="1"
                       value={stock.unitsPerPackage}
-                      onChange={(e) => setStock((s) => ({ ...s, unitsPerPackage: e.target.value }))}
+                      onChange={(e) =>
+                        setStock((s) => ({
+                          ...s,
+                          unitsPerPackage: e.target.value,
+                        }))
+                      }
                       placeholder="12"
                     />
                   </Field>
                   <Field>
-                    <Label htmlFor="stock-rem">Unidades restantes (paquete abierto)</Label>
+                    <Label htmlFor="stock-rem">
+                      Unidades restantes (paquete abierto)
+                    </Label>
                     <Input
                       id="stock-rem"
                       type="number"
                       min="0"
                       value={stock.unitsRemaining}
-                      onChange={(e) => setStock((s) => ({ ...s, unitsRemaining: e.target.value }))}
+                      onChange={(e) =>
+                        setStock((s) => ({
+                          ...s,
+                          unitsRemaining: e.target.value,
+                        }))
+                      }
                       placeholder="7"
                     />
                   </Field>
@@ -320,7 +352,7 @@ export function ItemForm({ initial }: ItemFormProps) {
       {submitError && <ErrorMsg>{submitError}</ErrorMsg>}
 
       <SubmitButton type="submit" disabled={isSubmitting}>
-        {isEdit ? 'Guardar cambios' : 'Añadir objeto'}
+        {isEdit ? 'Guardar cambios' : 'Añadir'}
       </SubmitButton>
     </Form>
   );
