@@ -356,11 +356,6 @@ export default function RoomsPage() {
 
   return (
     <Page>
-      <Back href="/items">
-        <ArrowLeft size={16} weight="light" />
-        Volver al inventario
-      </Back>
-
       <Header>
         <div>
           <Title>Estancias</Title>

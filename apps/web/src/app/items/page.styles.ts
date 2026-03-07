@@ -194,6 +194,7 @@ export const Filters = styled.section`
 export const LettersWrap = styled.div`
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.4rem;
 `;
 

@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  DownloadSimpleIcon,
-  PlusIcon,
-  ShoppingCartIcon,
-  SquaresFourIcon,
-} from '@phosphor-icons/react';
+import { DownloadSimpleIcon, PlusIcon } from '@phosphor-icons/react';
 import { useState } from 'react';
 import { EmptyState } from '../../components/EmptyState';
 import { SearchBar } from '../../components/SearchBar';
@@ -26,7 +21,6 @@ import {
   Header,
   LetterButton,
   LettersWrap,
-  NavLink,
   Page,
   RetryButton,
   SearchPromptImage,
@@ -89,15 +83,10 @@ export default function ItemsPage() {
       <Header>
         <Title>Tu inventario</Title>
         <Actions>
-          <NavLink href="/compra">
-            <ShoppingCartIcon size={16} weight="light" />
-            Compra
-          </NavLink>
-          <NavLink href="/rooms">
-            <SquaresFourIcon size={16} weight="light" />
-            Estancias
-          </NavLink>
-
+          <AddButton href="/items/new">
+            <PlusIcon size={16} weight="light" />
+            Añadir
+          </AddButton>
           {items.length > 0 && (
             <ExportWrap>
               <ExportButton onClick={() => setExportOpen((v) => !v)}>
@@ -126,11 +115,6 @@ export default function ItemsPage() {
               )}
             </ExportWrap>
           )}
-
-          <AddButton href="/items/new">
-            <PlusIcon size={16} weight="light" />
-            Añadir
-          </AddButton>
         </Actions>
       </Header>
 
@@ -181,13 +165,19 @@ export default function ItemsPage() {
         <EmptyState />
       ) : !query.trim() && !activeLetter ? (
         <SearchPromptWrap>
-          <SearchPromptTitle>Encuentra cualquier cosa en tu casa</SearchPromptTitle>
-          <SearchPromptSub>Usa el buscador o filtra por letra para encontrar un objeto.</SearchPromptSub>
+          <SearchPromptTitle>
+            Encuentra cualquier cosa en tu casa
+          </SearchPromptTitle>
+          <SearchPromptSub>
+            Usa el buscador o filtra por letra para encontrar un objeto.
+          </SearchPromptSub>
           <SearchPromptImage src="/rooms/items-cover.png" alt="" />
         </SearchPromptWrap>
       ) : filtered.length === 0 ? (
         <SearchPromptWrap>
-          <SearchPromptTitle>Sin resultados para &ldquo;{emptyQueryLabel}&rdquo;</SearchPromptTitle>
+          <SearchPromptTitle>
+            Sin resultados para &ldquo;{emptyQueryLabel}&rdquo;
+          </SearchPromptTitle>
           <SearchPromptImage src="/rooms/items-cover.png" alt="" />
         </SearchPromptWrap>
       ) : (

@@ -472,11 +472,6 @@ export default function CompraPage() {
 
   return (
     <Page>
-      <Back href="/items">
-        <ArrowLeftIcon size={16} weight="light" />
-        Inventario
-      </Back>
-
       <Header>
         <Title>Lista de la compra</Title>
         <AddButton onClick={() => { if (showForm) resetForm(); else setShowForm(true); }}>

@@ -1,5 +1,6 @@
-import { Lora, DM_Sans } from 'next/font/google'
+import { DM_Sans, Lora } from 'next/font/google'
 import { ErrorBoundary } from '../components/ErrorBoundary'
+import { Navbar } from '../components/Navbar'
 import { ToastContainer } from '../components/ToastContainer'
 import { StyledComponentsRegistry } from '../lib/registry'
 import { ThemeProvider } from '../lib/ThemeProvider'
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <StyledComponentsRegistry>
           <ThemeProvider>
+            <Navbar />
             <ErrorBoundary>
               {children}
             </ErrorBoundary>

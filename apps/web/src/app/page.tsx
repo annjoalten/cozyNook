@@ -1,6 +1,6 @@
 'use client';
 
-import { Plus } from '@phosphor-icons/react';
+import { PlusIcon } from '@phosphor-icons/react';
 import Link from 'next/link';
 import styled from 'styled-components';
 import { ItemCard } from '../components/ItemCard';
@@ -121,7 +121,7 @@ export default function HomePage() {
           Encuentra cualquier cosa, aunque hayas olvidado cómo la llamaste.
         </Subtitle>
         <AddButton href="/items/new">
-          <Plus size={16} weight="light" />
+          <PlusIcon size={16} weight="light" />
           Añadir
         </AddButton>
       </Hero>
