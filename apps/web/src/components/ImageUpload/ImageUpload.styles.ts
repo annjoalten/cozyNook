@@ -42,8 +42,9 @@ export const PreviewWrap = styled.div`
 
 export const Preview = styled.img`
   width: 100%;
-  max-height: 14rem;
-  object-fit: cover;
+  height: 14rem;
+  object-fit: contain;
+  background: ${({ theme }) => theme.colors.parchment};
   border-radius: ${({ theme }) => theme.radii.lg};
   border: 1.5px solid ${({ theme }) => theme.colors.cream};
 `;
