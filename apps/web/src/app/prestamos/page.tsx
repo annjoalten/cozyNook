@@ -1,22 +1,45 @@
 'use client';
 
-import { HandbagSimple } from '@phosphor-icons/react';
-import { useEffect } from 'react';
+import { CaretDown, HandbagSimple, Plus, X } from '@phosphor-icons/react';
+import { useEffect, useRef, useState } from 'react';
+import { useItemStore } from '../../store/itemStore';
 import { useLoansStore } from '../../store/loansStore';
 import {
+  AddBtn,
+  CancelBtn,
+  CloseButton,
   Count,
+  DropdownEmpty,
+  DropdownList,
+  DropdownMeta,
+  DropdownOption,
+  DropdownPanel,
+  DropdownSearch,
+  DropdownTrigger,
+  DropdownWrapper,
   EmptyIcon,
   EmptyText,
   EmptyWrap,
+  FieldGroup,
+  FieldInput,
+  FieldLabel,
   Header,
   ItemLink,
   LentTo,
   LoanCard,
   LoanInfo,
   LoanMeta,
+  ModalActions,
+  ModalCard,
+  ModalForm,
+  ModalHeader,
+  ModalOverlay,
+  ModalTitle,
   Page,
   ReturnBtn,
+  SubmitBtn,
   Title,
+  TitleGroup,
 } from './page.styles';
 
 function formatRelativeDate(dateStr: string): string {
@@ -37,23 +60,99 @@ export default function PrestamosPage() {
   const isLoading = useLoansStore((s) => s.isLoading);
   const hasLoaded = useLoansStore((s) => s.hasLoaded);
   const loadLoans = useLoansStore((s) => s.loadLoans);
+  const addLoan = useLoansStore((s) => s.addLoan);
   const returnLoan = useLoansStore((s) => s.returnLoan);
+
+  const items = useItemStore((s) => s.items);
+  const itemsLoaded = useItemStore((s) => s.hasLoaded);
+  const loadItems = useItemStore((s) => s.loadItems);
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [lentTo, setLentTo] = useState('');
+  const [note, setNote] = useState('');
+  const [selectedItemId, setSelectedItemId] = useState('');
+  const [search, setSearch] = useState('');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!hasLoaded) void loadLoans();
   }, [hasLoaded, loadLoans]);
+
+  useEffect(() => {
+    if (!itemsLoaded) void loadItems();
+  }, [itemsLoaded, loadItems]);
+
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, []);
+
+  const filteredItems = items
+    .filter((i) => i.name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
+    .slice(0, 10);
+
+  const selectedItem = items.find((i) => i.id === selectedItemId);
+
+  function openDropdown() {
+    setDropdownOpen(true);
+    setTimeout(() => searchRef.current?.focus(), 50);
+  }
+
+  function selectItem(id: string) {
+    setSelectedItemId(id);
+    setSearch('');
+    setDropdownOpen(false);
+  }
+
+  function resetModal() {
+    setLentTo('');
+    setNote('');
+    setSelectedItemId('');
+    setSearch('');
+    setDropdownOpen(false);
+    setModalOpen(false);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!selectedItemId || !lentTo.trim()) return;
+    setSubmitting(true);
+    await addLoan({
+      item_id: selectedItemId,
+      lent_to: lentTo.trim(),
+      note: note.trim() || undefined,
+    });
+    setSubmitting(false);
+    resetModal();
+  }
 
   const active = loans.filter((l) => !l.returned_at);
 
   return (
     <Page>
       <Header>
-        <Title>Préstamos</Title>
-        {!isLoading && active.length > 0 && (
-          <Count>
-            {active.length} activo{active.length !== 1 ? 's' : ''}
-          </Count>
-        )}
+        <TitleGroup>
+          <Title>Préstamos</Title>
+          {!isLoading && active.length > 0 && (
+            <Count>
+              {active.length} activo{active.length !== 1 ? 's' : ''}
+            </Count>
+          )}
+        </TitleGroup>
+        <AddBtn onClick={() => setModalOpen(true)}>
+          <Plus size={15} weight="bold" />
+          Registrar
+        </AddBtn>
       </Header>
 
       {isLoading ? (
@@ -87,6 +186,97 @@ export default function PrestamosPage() {
             </ReturnBtn>
           </LoanCard>
         ))
+      )}
+
+      {modalOpen && (
+        <ModalOverlay onClick={resetModal}>
+          <ModalCard onClick={(e) => e.stopPropagation()}>
+            <ModalHeader>
+              <ModalTitle>Registrar préstamo</ModalTitle>
+              <CloseButton onClick={resetModal} aria-label="Cerrar">
+                <X size={16} weight="bold" />
+              </CloseButton>
+            </ModalHeader>
+
+            <ModalForm onSubmit={handleSubmit}>
+              <FieldGroup>
+                <FieldLabel>Objeto</FieldLabel>
+                <DropdownWrapper ref={dropdownRef}>
+                  <DropdownTrigger
+                    type="button"
+                    $hasValue={!!selectedItemId}
+                    onClick={openDropdown}
+                  >
+                    <span>
+                      {selectedItem ? selectedItem.name : 'Selecciona un objeto…'}
+                    </span>
+                    <CaretDown size={14} weight="bold" />
+                  </DropdownTrigger>
+
+                  {dropdownOpen && (
+                    <DropdownPanel>
+                      <DropdownSearch
+                        ref={searchRef}
+                        placeholder="Buscar en inventario…"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                      />
+                      <DropdownList>
+                        {filteredItems.length > 0 ? (
+                          filteredItems.map((item) => (
+                            <DropdownOption
+                              key={item.id}
+                              type="button"
+                              onClick={() => selectItem(item.id)}
+                            >
+                              {item.name}
+                              <DropdownMeta>{item.location.room}</DropdownMeta>
+                            </DropdownOption>
+                          ))
+                        ) : (
+                          <DropdownEmpty>Sin resultados</DropdownEmpty>
+                        )}
+                      </DropdownList>
+                    </DropdownPanel>
+                  )}
+                </DropdownWrapper>
+              </FieldGroup>
+
+              <FieldGroup>
+                <FieldLabel htmlFor="lent-to">¿A quién se lo prestas?</FieldLabel>
+                <FieldInput
+                  id="lent-to"
+                  placeholder="Nombre"
+                  value={lentTo}
+                  onChange={(e) => setLentTo(e.target.value)}
+                  autoFocus={false}
+                />
+              </FieldGroup>
+
+              <FieldGroup>
+                <FieldLabel htmlFor="loan-note">Nota (opcional)</FieldLabel>
+                <FieldInput
+                  id="loan-note"
+                  placeholder="Ej: hasta el viernes"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                />
+              </FieldGroup>
+
+              <ModalActions>
+                <SubmitBtn
+                  type="submit"
+                  disabled={submitting || !selectedItemId || !lentTo.trim()}
+                >
+                  {submitting ? 'Guardando…' : 'Registrar préstamo'}
+                </SubmitBtn>
+                <CancelBtn type="button" onClick={resetModal}>
+                  Cancelar
+                </CancelBtn>
+              </ModalActions>
+            </ModalForm>
+          </ModalCard>
+        </ModalOverlay>
       )}
     </Page>
   );
