@@ -19,7 +19,9 @@ export const DropZone = styled.div<{ $loading: boolean }>`
   font-size: ${({ theme }) => theme.fontSize.sm};
   text-align: center;
   cursor: ${({ $loading }) => ($loading ? 'not-allowed' : 'pointer')};
-  transition: border-color 0.15s, color 0.15s;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
   background: ${({ theme }) => theme.colors.parchment};
 
   &:hover {
@@ -63,7 +65,9 @@ export const ClearButton = styled.button`
   padding: 0;
   transition: opacity 0.15s;
 
-  &:hover { opacity: 0.75; }
+  &:hover {
+    opacity: 0.75;
+  }
 `;
 
 export const ErrorMsg = styled.p`
