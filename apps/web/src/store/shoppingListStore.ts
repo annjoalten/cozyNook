@@ -4,7 +4,8 @@ import { useUIStore } from './uiStore';
 
 export interface ShoppingListItem {
   id: string;
-  item_id: string;
+  item_id: string | null;
+  custom_name: string | null;
   quantity_needed: number;
   checked: boolean;
   note: string | null;
@@ -16,7 +17,7 @@ export interface ShoppingListItem {
     category: string | null;
     room: string;
     spot: string;
-  };
+  } | null;
 }
 
 interface ShoppingListState {
@@ -24,7 +25,7 @@ interface ShoppingListState {
   isLoading: boolean;
   hasLoaded: boolean;
   loadList: () => Promise<void>;
-  addEntry: (payload: { item_id: string; quantity_needed?: number; note?: string }) => Promise<ShoppingListItem | null>;
+  addEntry: (payload: { item_id?: string; custom_name?: string; quantity_needed?: number; note?: string }) => Promise<ShoppingListItem | null>;
   toggleChecked: (id: string, checked: boolean) => Promise<void>;
   deleteEntry: (id: string) => Promise<void>;
 }

@@ -2,19 +2,19 @@
 
 import {
   ArrowLeftIcon,
+  CaretDownIcon,
   CheckIcon,
   PlusIcon,
-  ShoppingCartIcon,
   TrashIcon,
   XIcon,
 } from '@phosphor-icons/react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useItemStore } from '../../store/itemStore';
 import { useShoppingListStore } from '../../store/shoppingListStore';
 
-// ── Layout ──────────────────────────────────────────────────────────────────
+// ── Layout ───────────────────────────────────────────────────────────────────
 
 const Page = styled.main`
   max-width: 40rem;
@@ -23,14 +23,6 @@ const Page = styled.main`
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-`;
-
-const Header = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
 `;
 
 const Back = styled(Link)`
@@ -43,6 +35,14 @@ const Back = styled(Link)`
   &:hover {
     color: ${({ theme }) => theme.colors.bark};
   }
+`;
+
+const Header = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
 `;
 
 const Title = styled.h1`
@@ -70,7 +70,7 @@ const AddButton = styled.button`
   }
 `;
 
-// ── Add form ─────────────────────────────────────────────────────────────────
+// ── Form ─────────────────────────────────────────────────────────────────────
 
 const FormCard = styled.div`
   background: ${({ theme }) => theme.colors.parchment};
@@ -104,26 +104,12 @@ const Label = styled.label`
   font-weight: ${({ theme }) => theme.fontWeight.medium};
 `;
 
-const Select = styled.select`
-  padding: 0.55rem 0.75rem;
+const QtyInput = styled.input`
+  padding: 0.65rem 0.9rem;
   border: 1.5px solid ${({ theme }) => theme.colors.cream};
   border-radius: ${({ theme }) => theme.radii.md};
   font-family: ${({ theme }) => theme.fontFamily.body};
-  font-size: ${({ theme }) => theme.fontSize.sm};
-  color: ${({ theme }) => theme.colors.bark};
-  background: ${({ theme }) => theme.colors.white};
-  &:focus {
-    outline: none;
-    border-color: ${({ theme }) => theme.colors.sand};
-  }
-`;
-
-const Input = styled.input`
-  padding: 0.55rem 0.75rem;
-  border: 1.5px solid ${({ theme }) => theme.colors.cream};
-  border-radius: ${({ theme }) => theme.radii.md};
-  font-family: ${({ theme }) => theme.fontFamily.body};
-  font-size: ${({ theme }) => theme.fontSize.sm};
+  font-size: ${({ theme }) => theme.fontSize.base};
   color: ${({ theme }) => theme.colors.bark};
   background: ${({ theme }) => theme.colors.white};
   &:focus {
@@ -136,13 +122,13 @@ const SubmitButton = styled.button`
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.55rem 1.1rem;
+  padding: 0.65rem 1.1rem;
   background: ${({ theme }) => theme.colors.bark};
   color: ${({ theme }) => theme.colors.parchment};
   border: none;
   border-radius: ${({ theme }) => theme.radii.md};
   font-family: ${({ theme }) => theme.fontFamily.body};
-  font-size: ${({ theme }) => theme.fontSize.sm};
+  font-size: ${({ theme }) => theme.fontSize.base};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
   cursor: pointer;
   white-space: nowrap;
@@ -152,6 +138,115 @@ const SubmitButton = styled.button`
   }
   &:not(:disabled):hover {
     background: ${({ theme }) => theme.colors.clay};
+  }
+`;
+
+// ── Custom dropdown ───────────────────────────────────────────────────────────
+
+const DropdownWrapper = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+const DropdownTrigger = styled.button<{ $hasValue: boolean }>`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.9rem;
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.base};
+  color: ${({ $hasValue, theme }) =>
+    $hasValue ? theme.colors.bark : theme.colors.taupe};
+  background: ${({ theme }) => theme.colors.white};
+  border: 1.5px solid ${({ theme }) => theme.colors.cream};
+  border-radius: ${({ theme }) => theme.radii.md};
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease;
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.sand};
+  }
+`;
+
+const DropdownPanel = styled.div`
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: ${({ theme }) => theme.colors.white};
+  border: 1.5px solid ${({ theme }) => theme.colors.cream};
+  border-radius: ${({ theme }) => theme.radii.md};
+  box-shadow: ${({ theme }) => theme.shadow.card};
+  z-index: 50;
+  overflow: hidden;
+`;
+
+const DropdownSearch = styled.input`
+  width: 100%;
+  padding: 0.6rem 0.9rem;
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.colors.bark};
+  background: ${({ theme }) => theme.colors.parchment};
+  border: none;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.cream};
+  outline: none;
+  box-sizing: border-box;
+  &::placeholder {
+    color: ${({ theme }) => theme.colors.taupe};
+  }
+`;
+
+const DropdownList = styled.div`
+  max-height: 15rem;
+  overflow-y: auto;
+  padding: 0.25rem;
+`;
+
+const DropdownOption = styled.button<{ $selected: boolean }>`
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.colors.bark};
+  background: ${({ $selected, theme }) =>
+    $selected ? theme.colors.parchment : 'transparent'};
+  border: none;
+  border-radius: ${({ theme }) => theme.radii.sm};
+  cursor: pointer;
+  transition: background 0.1s;
+  &:hover {
+    background: ${({ theme }) => theme.colors.parchment};
+  }
+`;
+
+const DropdownOptionMeta = styled.span`
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  color: ${({ theme }) => theme.colors.taupe};
+  margin-left: 0.4rem;
+`;
+
+const DropdownFreeRow = styled.button`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.75rem;
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.colors.taupe};
+  background: transparent;
+  border: none;
+  border-top: 1px solid ${({ theme }) => theme.colors.cream};
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+  &:hover {
+    background: ${({ theme }) => theme.colors.parchment};
+    color: ${({ theme }) => theme.colors.bark};
   }
 `;
 
@@ -246,7 +341,9 @@ const DeleteButton = styled.button`
   color: ${({ theme }) => theme.colors.taupe};
   cursor: pointer;
   border-radius: ${({ theme }) => theme.radii.sm};
-  transition: color 0.15s, background 0.15s;
+  transition:
+    color 0.15s,
+    background 0.15s;
   &:hover {
     color: ${({ theme }) => theme.colors.bark};
     background: ${({ theme }) => theme.colors.parchment};
@@ -283,9 +380,17 @@ export default function CompraPage() {
   const { items, hasLoaded: itemsLoaded, loadItems } = useItemStore();
 
   const [showForm, setShowForm] = useState(false);
+
+  // Dropdown state
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [search, setSearch] = useState('');
   const [selectedItemId, setSelectedItemId] = useState('');
+  const [selectedCustomName, setSelectedCustomName] = useState('');
   const [qty, setQty] = useState('1');
   const [isAdding, setIsAdding] = useState(false);
+
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!hasLoaded) loadList();
@@ -295,19 +400,71 @@ export default function CompraPage() {
     if (!itemsLoaded) loadItems();
   }, [itemsLoaded, loadItems]);
 
-  const pending = entries.filter((e) => !e.checked);
-  const checked = entries.filter((e) => e.checked);
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const filtered = items
+    .filter((i) => i.name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
+    .slice(0, 10);
+
+  const hasExactMatch = items.some(
+    (i) => i.name.toLowerCase() === search.toLowerCase(),
+  );
+
+  const displayLabel = selectedItemId
+    ? items.find((i) => i.id === selectedItemId)?.name ?? ''
+    : selectedCustomName;
+
+  function openDropdown() {
+    setDropdownOpen(true);
+    setTimeout(() => searchRef.current?.focus(), 50);
+  }
+
+  function selectItem(id: string) {
+    setSelectedItemId(id);
+    setSelectedCustomName('');
+    setSearch('');
+    setDropdownOpen(false);
+  }
+
+  function selectCustom() {
+    setSelectedCustomName(search.trim());
+    setSelectedItemId('');
+    setSearch('');
+    setDropdownOpen(false);
+  }
+
+  function resetForm() {
+    setSelectedItemId('');
+    setSelectedCustomName('');
+    setSearch('');
+    setQty('1');
+    setShowForm(false);
+  }
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedItemId) return;
+    if (!selectedItemId && !selectedCustomName) return;
     setIsAdding(true);
-    await addEntry({ item_id: selectedItemId, quantity_needed: parseInt(qty, 10) || 1 });
+    const payload = selectedItemId
+      ? { item_id: selectedItemId, quantity_needed: parseInt(qty, 10) || 1 }
+      : { custom_name: selectedCustomName, quantity_needed: parseInt(qty, 10) || 1 };
+    await addEntry(payload);
     setIsAdding(false);
-    setSelectedItemId('');
-    setQty('1');
-    setShowForm(false);
+    resetForm();
   };
+
+  const pending = entries.filter((e) => !e.checked);
+  const checked = entries.filter((e) => e.checked);
 
   const handleClearChecked = async () => {
     await Promise.all(checked.map((e) => deleteEntry(e.id)));
@@ -322,7 +479,7 @@ export default function CompraPage() {
 
       <Header>
         <Title>Lista de la compra</Title>
-        <AddButton onClick={() => setShowForm((v) => !v)}>
+        <AddButton onClick={() => { if (showForm) resetForm(); else setShowForm(true); }}>
           {showForm ? (
             <>
               <XIcon size={16} weight="light" />
@@ -342,29 +499,52 @@ export default function CompraPage() {
           <form onSubmit={handleAdd}>
             <FormRow>
               <FormField style={{ flex: 3 }}>
-                <Label htmlFor="item-select">Objeto del inventario</Label>
-                <Select
-                  id="item-select"
-                  value={selectedItemId}
-                  onChange={(e) => setSelectedItemId(e.target.value)}
-                  required
-                >
-                  <option value="">Selecciona un objeto…</option>
-                  {items
-                    .slice()
-                    .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
-                    .map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.name}
-                        {item.location.room ? ` · ${item.location.room}` : ''}
-                      </option>
-                    ))}
-                </Select>
+                <Label>Objeto</Label>
+                <DropdownWrapper ref={wrapperRef}>
+                  <DropdownTrigger
+                    type="button"
+                    $hasValue={!!displayLabel}
+                    onClick={openDropdown}
+                  >
+                    <span>{displayLabel || 'Busca o escribe un artículo…'}</span>
+                    <CaretDownIcon size={14} weight="bold" />
+                  </DropdownTrigger>
+
+                  {dropdownOpen && (
+                    <DropdownPanel>
+                      <DropdownSearch
+                        ref={searchRef}
+                        placeholder="Buscar en inventario…"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                      />
+                      <DropdownList>
+                        {filtered.map((item) => (
+                          <DropdownOption
+                            key={item.id}
+                            type="button"
+                            $selected={item.id === selectedItemId}
+                            onClick={() => selectItem(item.id)}
+                          >
+                            {item.name}
+                            <DropdownOptionMeta>{item.location.room}</DropdownOptionMeta>
+                          </DropdownOption>
+                        ))}
+                      </DropdownList>
+                      {search.trim() && !hasExactMatch && (
+                        <DropdownFreeRow type="button" onClick={selectCustom}>
+                          <PlusIcon size={12} weight="bold" />
+                          Añadir &ldquo;{search.trim()}&rdquo;
+                        </DropdownFreeRow>
+                      )}
+                    </DropdownPanel>
+                  )}
+                </DropdownWrapper>
               </FormField>
 
               <FormField style={{ flex: 1 }}>
                 <Label htmlFor="qty-input">Cantidad</Label>
-                <Input
+                <QtyInput
                   id="qty-input"
                   type="number"
                   min="1"
@@ -373,8 +553,10 @@ export default function CompraPage() {
                 />
               </FormField>
 
-              <SubmitButton type="submit" disabled={isAdding || !selectedItemId}>
-                <ShoppingCartIcon size={15} weight="light" />
+              <SubmitButton
+                type="submit"
+                disabled={isAdding || (!selectedItemId && !selectedCustomName)}
+              >
                 Añadir
               </SubmitButton>
             </FormRow>
@@ -400,10 +582,13 @@ export default function CompraPage() {
                       aria-label="Marcar como comprado"
                     />
                     <EntryInfo>
-                      <EntryName>{entry.item.name}</EntryName>
+                      <EntryName>
+                        {entry.custom_name ?? entry.item?.name}
+                      </EntryName>
                       <EntryMeta>
-                        {entry.item.room}
-                        {entry.item.category ? ` · ${entry.item.category}` : ''}
+                        {entry.item
+                          ? `${entry.item.room}${entry.item.category ? ` · ${entry.item.category}` : ''}`
+                          : 'Artículo libre'}
                       </EntryMeta>
                     </EntryInfo>
                     {entry.quantity_needed > 1 && (
@@ -423,9 +608,7 @@ export default function CompraPage() {
 
           {checked.length > 0 && (
             <div>
-              <SectionTitle>
-                <span>Comprado ({checked.length})</span>
-              </SectionTitle>
+              <SectionTitle>Comprado ({checked.length})</SectionTitle>
               <EntryList>
                 {checked.map((entry) => (
                   <EntryCard key={entry.id} $checked>
@@ -437,8 +620,12 @@ export default function CompraPage() {
                       <CheckIcon size={10} weight="bold" color="white" />
                     </Checkbox>
                     <EntryInfo>
-                      <EntryName>{entry.item.name}</EntryName>
-                      <EntryMeta>{entry.item.room}</EntryMeta>
+                      <EntryName>
+                        {entry.custom_name ?? entry.item?.name}
+                      </EntryName>
+                      <EntryMeta>
+                        {entry.item ? entry.item.room : 'Artículo libre'}
+                      </EntryMeta>
                     </EntryInfo>
                     {entry.quantity_needed > 1 && (
                       <Qty>×{entry.quantity_needed}</Qty>
