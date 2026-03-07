@@ -14,6 +14,7 @@ interface ItemState {
   hasLoaded: boolean;
   error: string | null;
   loadItems: () => Promise<void>;
+  reload: () => Promise<void>;
   addItem: (item: Omit<Item, 'id' | 'createdAt'>) => Promise<Item | null>;
   updateItem: (
     id: string,
@@ -43,19 +44,22 @@ export const useItemStore = create<ItemState>()(
           const items = (await res.json()) as Item[];
           set({ items, hasLoaded: true }, false, 'loadItems:success');
         } catch (error) {
-          set(
-            {
-              error:
-                error instanceof Error
-                  ? error.message
-                  : 'Error cargando inventario',
-            },
-            false,
-            'loadItems:error',
-          );
+          const msg =
+            error instanceof Error
+              ? error.message
+              : 'Error cargando inventario';
+          // hasLoaded: true para que useLoadItems no reintente en bucle.
+          // El usuario puede reintentar manualmente con reload().
+          set({ error: msg, hasLoaded: true }, false, 'loadItems:error');
+          toast.error('No se pudo conectar. Comprueba tu conexión.');
         } finally {
           set({ isLoading: false }, false, 'loadItems:end');
         }
+      },
+
+      reload: async () => {
+        set({ hasLoaded: false, error: null }, false, 'reload');
+        await get().loadItems();
       },
 
       addItem: async (item) => {

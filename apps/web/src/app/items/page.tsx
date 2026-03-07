@@ -126,12 +126,42 @@ const ExportOption = styled.button`
   &:hover { background: ${({ theme }) => theme.colors.parchment}; }
 `;
 
+const ErrorBanner = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: ${({ theme }) => theme.colors.parchment};
+  border: 1.5px solid ${({ theme }) => theme.colors.sand};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.colors.bark};
+`;
+
+const RetryButton = styled.button`
+  flex-shrink: 0;
+  padding: 0.4rem 1rem;
+  background: ${({ theme }) => theme.colors.bark};
+  color: ${({ theme }) => theme.colors.parchment};
+  border: none;
+  border-radius: ${({ theme }) => theme.radii.md};
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  font-weight: ${({ theme }) => theme.fontWeight.medium};
+  cursor: pointer;
+  transition: opacity 0.15s;
+  &:hover { opacity: 0.85; }
+`;
+
 export default function ItemsPage() {
   useLoadItems();
 
   const items = useItemStore((s) => s.items);
   const isLoading = useItemStore((s) => s.isLoading);
   const error = useItemStore((s) => s.error);
+  const reload = useItemStore((s) => s.reload);
   const activeRoom = useUIStore((s) => s.activeRoom);
   const setActiveRoom = useUIStore((s) => s.setActiveRoom);
   const [exportOpen, setExportOpen] = useState(false);
@@ -182,10 +212,13 @@ export default function ItemsPage() {
 
       <RoomSelector value={activeRoom} onChange={setActiveRoom} />
 
-      {error && <p>Error: {error}</p>}
-
       {isLoading ? (
         <ItemListSkeleton count={6} />
+      ) : error ? (
+        <ErrorBanner>
+          <span>No se pudo conectar con el servidor. Comprueba tu conexión o inténtalo en unos minutos.</span>
+          <RetryButton onClick={() => void reload()}>Reintentar</RetryButton>
+        </ErrorBanner>
       ) : items.length === 0 ? (
         <EmptyState />
       ) : (
