@@ -1,22 +1,19 @@
 'use client';
 
-import {
-  ArrowLeft,
-  Check,
-  PencilSimple,
-  Plus,
-  Trash,
-  X,
-} from '@phosphor-icons/react';
+import { ROOMS } from '@nook/core';
+import { ArrowLeft, HouseLine, Plus, X } from '@phosphor-icons/react';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
-import { SkeletonBlock } from '../../components/Skeleton';
+import { ImageUpload } from '../../components/ImageUpload';
+import { ItemListSkeleton } from '../../components/Skeleton';
+import { useLoadItems } from '../../hooks/useLoadItems';
+import { getRoomCover } from '../../lib/roomCovers';
+import { useItemStore } from '../../store/itemStore';
 import { useRoomStore } from '../../store/roomStore';
 
 const Page = styled.main`
-  max-width: 36rem;
+  max-width: 64rem;
   margin: 0 auto;
   padding: 2.5rem 1rem 4rem;
   display: flex;
@@ -31,13 +28,17 @@ const Back = styled(Link)`
   font-family: ${({ theme }) => theme.fontFamily.body};
   font-size: ${({ theme }) => theme.fontSize.sm};
   color: ${({ theme }) => theme.colors.taupe};
-  &:hover { color: ${({ theme }) => theme.colors.bark}; }
+  &:hover {
+    color: ${({ theme }) => theme.colors.bark};
+  }
 `;
 
 const Header = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
 `;
 
 const Title = styled.h1`
@@ -46,162 +47,277 @@ const Title = styled.h1`
   color: ${({ theme }) => theme.colors.bark};
 `;
 
-const Card = styled.div`
-  background: ${({ theme }) => theme.colors.white};
-  border-radius: ${({ theme }) => theme.radii.xl};
-  box-shadow: ${({ theme }) => theme.shadow.card};
-  overflow: hidden;
-`;
-
-const RoomRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.85rem 1.1rem;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.parchment};
-
-  &:last-child { border-bottom: none; }
-`;
-
-const RoomName = styled.span`
-  flex: 1;
+const Subtitle = styled.p`
+  margin-top: 0.25rem;
   font-family: ${({ theme }) => theme.fontFamily.body};
-  font-size: ${({ theme }) => theme.fontSize.base};
-  color: ${({ theme }) => theme.colors.bark};
+  color: ${({ theme }) => theme.colors.taupe};
+  font-size: ${({ theme }) => theme.fontSize.sm};
 `;
 
-const InlineInput = styled.input`
-  flex: 1;
-  font-family: ${({ theme }) => theme.fontFamily.body};
-  font-size: ${({ theme }) => theme.fontSize.base};
-  color: ${({ theme }) => theme.colors.bark};
-  background: ${({ theme }) => theme.colors.parchment};
-  border: 1.5px solid ${({ theme }) => theme.colors.olive};
-  border-radius: ${({ theme }) => theme.radii.sm};
-  padding: 0.25rem 0.5rem;
-  outline: none;
+const Grid = styled.section`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14.5rem, 1fr));
+  gap: 1rem;
 `;
 
-const IconButton = styled.button<{ $danger?: boolean }>`
-  display: flex;
+const CreateButton = styled.button`
+  display: inline-flex;
   align-items: center;
-  padding: 0.3rem;
-  background: none;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
   border: none;
+  border-radius: ${({ theme }) => theme.radii.md};
+  background: ${({ theme }) => theme.colors.bark};
+  color: ${({ theme }) => theme.colors.parchment};
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  font-weight: ${({ theme }) => theme.fontWeight.medium};
   cursor: pointer;
-  color: ${({ $danger, theme }) =>
-    $danger ? theme.colors.terracotta : theme.colors.taupe};
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(36, 31, 26, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 80;
+`;
+
+const ModalCard = styled.section`
+  width: min(34rem, 100%);
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  padding: 1rem;
+  background: ${({ theme }) => theme.colors.white};
+  border: 1.5px solid ${({ theme }) => theme.colors.cream};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  box-shadow: ${({ theme }) => theme.shadow.elevated};
+`;
+
+const ModalHeader = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+`;
+
+const CloseButton = styled.button`
+  padding: 0.2rem;
+  border: none;
   border-radius: ${({ theme }) => theme.radii.sm};
-  transition: color 0.15s, background 0.15s;
+  background: transparent;
+  color: ${({ theme }) => theme.colors.taupe};
+  cursor: pointer;
 
   &:hover {
-    color: ${({ $danger, theme }) =>
-      $danger ? theme.colors.terracotta : theme.colors.bark};
+    color: ${({ theme }) => theme.colors.bark};
     background: ${({ theme }) => theme.colors.parchment};
   }
 `;
 
-const AddRow = styled.form`
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 1rem 1.1rem;
-  border-top: 1px solid ${({ theme }) => theme.colors.cream};
+const CreatorTitle = styled.h2`
+  font-family: ${({ theme }) => theme.fontFamily.heading};
+  font-size: ${({ theme }) => theme.fontSize.lg};
+  color: ${({ theme }) => theme.colors.bark};
 `;
 
-const AddInput = styled.input`
-  flex: 1;
+const CreatorHint = styled.p`
+  margin-top: 0.25rem;
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.colors.taupe};
+`;
+
+const CreatorForm = styled.form`
+  margin-top: 0.9rem;
+  display: grid;
+  gap: 0.75rem;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1.5px solid ${({ theme }) => theme.colors.cream};
+  border-radius: ${({ theme }) => theme.radii.md};
   font-family: ${({ theme }) => theme.fontFamily.body};
   font-size: ${({ theme }) => theme.fontSize.sm};
   color: ${({ theme }) => theme.colors.bark};
   background: ${({ theme }) => theme.colors.parchment};
-  border: 1.5px solid ${({ theme }) => theme.colors.cream};
-  border-radius: ${({ theme }) => theme.radii.md};
-  padding: 0.5rem 0.75rem;
-  outline: none;
-  transition: border-color 0.15s;
-
-  &:focus { border-color: ${({ theme }) => theme.colors.olive}; }
-  &::placeholder { color: ${({ theme }) => theme.colors.taupe}; opacity: 0.7; }
 `;
 
-const AddButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.5rem 0.9rem;
+const TextArea = styled.textarea`
+  width: 100%;
+  min-height: 5rem;
+  resize: vertical;
+  padding: 0.65rem 0.75rem;
+  border: 1.5px solid ${({ theme }) => theme.colors.cream};
+  border-radius: ${({ theme }) => theme.radii.md};
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.colors.bark};
+  background: ${({ theme }) => theme.colors.parchment};
+`;
+
+const Submit = styled.button`
+  justify-self: start;
+  padding: 0.55rem 1rem;
+  border: none;
+  border-radius: ${({ theme }) => theme.radii.md};
+  background: ${({ theme }) => theme.colors.bark};
+  color: ${({ theme }) => theme.colors.parchment};
   font-family: ${({ theme }) => theme.fontFamily.body};
   font-size: ${({ theme }) => theme.fontSize.sm};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
-  color: ${({ theme }) => theme.colors.parchment};
-  background: ${({ theme }) => theme.colors.bark};
-  border: none;
-  border-radius: ${({ theme }) => theme.radii.md};
   cursor: pointer;
-  transition: opacity 0.15s;
-
-  &:hover { opacity: 0.85; }
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
 `;
 
-const SkeletonList = styled.div`
+const RoomCard = styled(Link)`
+  background: ${({ theme }) => theme.colors.white};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  box-shadow: ${({ theme }) => theme.shadow.card};
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding: 1.1rem;
+
+  &:hover {
+    transform: translateY(-2px);
+    transition: transform 0.15s ease;
+  }
+`;
+
+const Cover = styled.div<{ $bg: string; $image?: string }>`
+  height: 7.25rem;
+  width: 100%;
+  background: ${({ $image, $bg }) =>
+    $image ? `url(${$image}) center/cover no-repeat` : $bg};
+`;
+
+const CardBody = styled.div`
+  padding: 0.85rem 0.95rem 1rem;
+`;
+
+const RoomName = styled.h2`
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.lg};
+  font-weight: ${({ theme }) => theme.fontWeight.medium};
+  color: ${({ theme }) => theme.colors.bark};
+  line-height: ${({ theme }) => theme.lineHeight.tight};
+`;
+
+const ItemCount = styled.p`
+  margin-top: 0.3rem;
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.colors.taupe};
+`;
+
+const RoomDescription = styled.p`
+  margin-top: 0.35rem;
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.colors.taupe};
+  line-height: ${({ theme }) => theme.lineHeight.relaxed};
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+`;
+
+const EmptyMessage = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: ${({ theme }) => theme.colors.parchment};
+  border: 1.5px solid ${({ theme }) => theme.colors.cream};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.colors.taupe};
 `;
 
 export default function RoomsPage() {
-  const { rooms, isLoading, hasLoaded, loadRooms, addRoom, updateRoom, deleteRoom } =
-    useRoomStore();
+  useLoadItems();
 
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editName, setEditName] = useState('');
-  const [newName, setNewName] = useState('');
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [confirmId, setConfirmId] = useState<string | null>(null);
-  const editRef = useRef<HTMLInputElement>(null);
+  const items = useItemStore((s) => s.items);
+  const isLoading = useItemStore((s) => s.isLoading);
+  const error = useItemStore((s) => s.error);
+  const reload = useItemStore((s) => s.reload);
+
+  const roomRecords = useRoomStore((s) => s.rooms);
+  const hasLoadedRooms = useRoomStore((s) => s.hasLoaded);
+  const loadRooms = useRoomStore((s) => s.loadRooms);
+  const addRoom = useRoomStore((s) => s.addRoom);
+  const [newTitle, setNewTitle] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+  const [newImageUrl, setNewImageUrl] = useState<string | undefined>();
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isSavingRoom, setIsSavingRoom] = useState(false);
 
   useEffect(() => {
-    if (!hasLoaded) loadRooms();
-  }, [hasLoaded, loadRooms]);
+    if (!hasLoadedRooms) {
+      void loadRooms();
+    }
+  }, [hasLoadedRooms, loadRooms]);
 
-  useEffect(() => {
-    if (editingId) editRef.current?.focus();
-  }, [editingId]);
+  const itemCounts = items.reduce((acc, item) => {
+    const roomName = item.location.room?.trim() || 'Sin estancia';
+    acc.set(roomName, (acc.get(roomName) ?? 0) + 1);
+    return acc;
+  }, new Map<string, number>());
 
-  const startEdit = (id: string, name: string) => {
-    setEditingId(id);
-    setEditName(name);
+  const roomByName = useMemo(
+    () => new Map(roomRecords.map((room) => [room.name, room])),
+    [roomRecords],
+  );
+
+  const allRoomNames = Array.from(
+    new Set([
+      ...ROOMS,
+      ...roomRecords.map((room) => room.name),
+      ...Array.from(itemCounts.keys()),
+    ]),
+  );
+
+  const rooms = allRoomNames
+    .map((name) => ({
+      name,
+      count: itemCounts.get(name) ?? 0,
+      meta: roomByName.get(name),
+    }))
+    .sort((a, b) =>
+      a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }),
+    );
+
+  const handleCreateRoom = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const name = newTitle.trim();
+    if (!name || isSavingRoom) return;
+
+    setIsSavingRoom(true);
+
+    const created = await addRoom({
+      name,
+      description: newDescription.trim() || undefined,
+      imageUrl: newImageUrl,
+    });
+
+    setIsSavingRoom(false);
+
+    if (created) {
+      setNewTitle('');
+      setNewDescription('');
+      setNewImageUrl(undefined);
+      setIsCreateOpen(false);
+    }
   };
-
-  const cancelEdit = () => {
-    setEditingId(null);
-    setEditName('');
-  };
-
-  const saveEdit = async (id: string) => {
-    if (!editName.trim()) return;
-    await updateRoom(id, editName.trim());
-    cancelEdit();
-  };
-
-  const handleAdd = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newName.trim()) return;
-    const ok = await addRoom(newName.trim());
-    if (ok) setNewName('');
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!confirmId) return;
-    setDeletingId(confirmId);
-    await deleteRoom(confirmId);
-    setDeletingId(null);
-    setConfirmId(null);
-  };
-
-  const confirmingRoom = rooms.find((r) => r.id === confirmId);
 
   return (
     <Page>
@@ -211,87 +327,102 @@ export default function RoomsPage() {
       </Back>
 
       <Header>
-        <Title>Habitaciones</Title>
+        <div>
+          <Title>Estancias</Title>
+          <Subtitle>
+            Explora por estancia y entra para ver sus objetos.
+          </Subtitle>
+        </div>
+        <CreateButton type="button" onClick={() => setIsCreateOpen(true)}>
+          <Plus size={16} weight="bold" />
+          Crear estancia
+        </CreateButton>
       </Header>
 
-      <Card>
-        {isLoading && !hasLoaded ? (
-          <SkeletonList>
-            {[1, 2, 3, 4].map((i) => (
-              <SkeletonBlock key={i} height="1.1rem" width={`${50 + i * 8}%`} />
-            ))}
-          </SkeletonList>
-        ) : rooms.length === 0 ? (
-          <RoomRow>
-            <RoomName style={{ color: 'var(--taupe)', fontStyle: 'italic' }}>
-              Aún no hay habitaciones
-            </RoomName>
-          </RoomRow>
-        ) : (
-          rooms.map((room) => (
-            <RoomRow key={room.id}>
-              {editingId === room.id ? (
-                <>
-                  <InlineInput
-                    ref={editRef}
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') saveEdit(room.id);
-                      if (e.key === 'Escape') cancelEdit();
-                    }}
-                  />
-                  <IconButton onClick={() => saveEdit(room.id)} aria-label="Guardar">
-                    <Check size={16} weight="bold" />
-                  </IconButton>
-                  <IconButton onClick={cancelEdit} aria-label="Cancelar">
-                    <X size={16} weight="bold" />
-                  </IconButton>
-                </>
-              ) : (
-                <>
+      {isCreateOpen ? (
+        <ModalOverlay onClick={() => setIsCreateOpen(false)}>
+          <ModalCard onClick={(event) => event.stopPropagation()}>
+            <ModalHeader>
+              <div>
+                <CreatorTitle>Crear estancia</CreatorTitle>
+                <CreatorHint>
+                  Añade título, descripción e imagen para personalizar tus
+                  estancias.
+                </CreatorHint>
+              </div>
+              <CloseButton
+                type="button"
+                aria-label="Cerrar modal"
+                onClick={() => setIsCreateOpen(false)}
+              >
+                <X size={16} weight="bold" />
+              </CloseButton>
+            </ModalHeader>
+
+            <CreatorForm onSubmit={handleCreateRoom}>
+              <Input
+                value={newTitle}
+                onChange={(event) => setNewTitle(event.target.value)}
+                placeholder="Título de la estancia"
+              />
+              <TextArea
+                value={newDescription}
+                onChange={(event) => setNewDescription(event.target.value)}
+                placeholder="Descripción corta"
+                maxLength={300}
+              />
+              <ImageUpload value={newImageUrl} onChange={setNewImageUrl} />
+              <Submit type="submit" disabled={isSavingRoom || !newTitle.trim()}>
+                {isSavingRoom ? 'Guardando...' : 'Guardar estancia'}
+              </Submit>
+            </CreatorForm>
+          </ModalCard>
+        </ModalOverlay>
+      ) : null}
+
+      {isLoading ? (
+        <ItemListSkeleton count={6} />
+      ) : error ? (
+        <EmptyMessage>
+          <span>No se pudo cargar el inventario.</span>
+          <button type="button" onClick={() => void reload()}>
+            Reintentar
+          </button>
+        </EmptyMessage>
+      ) : rooms.length === 0 ? (
+        <EmptyMessage>
+          <HouseLine size={18} weight="light" />
+          No hay estancias con objetos todavía.
+        </EmptyMessage>
+      ) : (
+        <Grid>
+          {rooms.map((room) => {
+            const cover = getRoomCover(room.name);
+            const coverImage = room.meta?.image_url ?? cover.image;
+            const description = room.meta?.description?.trim();
+            return (
+              <RoomCard
+                key={room.name}
+                href={`/rooms/${encodeURIComponent(room.name)}`}
+              >
+                <Cover
+                  $bg={cover.background}
+                  $image={coverImage ?? undefined}
+                />
+                <CardBody>
                   <RoomName>{room.name}</RoomName>
-                  <IconButton
-                    onClick={() => startEdit(room.id, room.name)}
-                    aria-label="Editar"
-                  >
-                    <PencilSimple size={16} weight="light" />
-                  </IconButton>
-                  <IconButton
-                    $danger
-                    onClick={() => setConfirmId(room.id)}
-                    aria-label="Eliminar"
-                  >
-                    <Trash size={16} weight="light" />
-                  </IconButton>
-                </>
-              )}
-            </RoomRow>
-          ))
-        )}
-
-        <AddRow onSubmit={handleAdd}>
-          <AddInput
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder="Nueva habitación…"
-          />
-          <AddButton type="submit" disabled={!newName.trim()}>
-            <Plus size={14} weight="bold" />
-            Añadir
-          </AddButton>
-        </AddRow>
-      </Card>
-
-      <ConfirmDialog
-        open={!!confirmId}
-        title={`¿Eliminar "${confirmingRoom?.name}"?`}
-        description="Los objetos en esta habitación no se eliminarán, pero perderán su habitación asignada."
-        confirmLabel="Eliminar"
-        loading={deletingId === confirmId}
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => setConfirmId(null)}
-      />
+                  <ItemCount>
+                    {room.count} {room.count === 1 ? 'item' : 'items'}
+                  </ItemCount>
+                  {description ? (
+                    <RoomDescription>{description}</RoomDescription>
+                  ) : null}
+                </CardBody>
+              </RoomCard>
+            );
+          })}
+        </Grid>
+      )}
     </Page>
   );
 }

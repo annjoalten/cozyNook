@@ -1,17 +1,20 @@
 'use client';
 
-import { DownloadSimpleIcon, PlusIcon, SquaresFourIcon } from '@phosphor-icons/react';
+import {
+  DownloadSimpleIcon,
+  PlusIcon,
+  SquaresFourIcon,
+} from '@phosphor-icons/react';
 import Link from 'next/link';
 import { useState } from 'react';
 import styled from 'styled-components';
 import { EmptyState } from '../../components/EmptyState';
-import { RoomSelector } from '../../components/RoomSelector';
+import { SearchBar } from '../../components/SearchBar';
 import { SearchResults } from '../../components/SearchResults';
 import { ItemListSkeleton } from '../../components/Skeleton';
 import { useLoadItems } from '../../hooks/useLoadItems';
 import { exportToCSV, exportToJSON } from '../../lib/exportInventory';
 import { useItemStore } from '../../store/itemStore';
-import { useUIStore } from '../../store/uiStore';
 
 const Page = styled.main`
   max-width: 56rem;
@@ -63,7 +66,9 @@ const RoomsLink = styled(Link)`
   font-family: ${({ theme }) => theme.fontFamily.body};
   font-size: ${({ theme }) => theme.fontSize.sm};
   color: ${({ theme }) => theme.colors.taupe};
-  transition: border-color 0.15s, color 0.15s;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
   &:hover {
     border-color: ${({ theme }) => theme.colors.sand};
     color: ${({ theme }) => theme.colors.bark};
@@ -92,7 +97,9 @@ const ExportButton = styled.button`
   color: ${({ theme }) => theme.colors.taupe};
   background: transparent;
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
   &:hover {
     border-color: ${({ theme }) => theme.colors.sand};
     color: ${({ theme }) => theme.colors.bark};
@@ -123,7 +130,9 @@ const ExportOption = styled.button`
   border: none;
   cursor: pointer;
   transition: background 0.1s;
-  &:hover { background: ${({ theme }) => theme.colors.parchment}; }
+  &:hover {
+    background: ${({ theme }) => theme.colors.parchment};
+  }
 `;
 
 const ErrorBanner = styled.div`
@@ -152,8 +161,61 @@ const RetryButton = styled.button`
   font-weight: ${({ theme }) => theme.fontWeight.medium};
   cursor: pointer;
   transition: opacity 0.15s;
-  &:hover { opacity: 0.85; }
+  &:hover {
+    opacity: 0.85;
+  }
 `;
+
+const Filters = styled.section`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+const LettersWrap = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+`;
+
+const LetterButton = styled.button<{ $active?: boolean }>`
+  min-width: 2.2rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: ${({ theme }) => theme.radii.md};
+  border: 1px solid
+    ${({ $active, theme }) =>
+      $active ? theme.colors.bark : theme.colors.cream};
+  background: ${({ $active, theme }) =>
+    $active ? theme.colors.bark : theme.colors.white};
+  color: ${({ $active, theme }) =>
+    $active ? theme.colors.parchment : theme.colors.taupe};
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  font-weight: ${({ theme }) => theme.fontWeight.medium};
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.sand};
+    color: ${({ $active, theme }) =>
+      $active ? theme.colors.parchment : theme.colors.bark};
+  }
+`;
+
+const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+function normalizeText(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toUpperCase();
+}
+
+function initialBucket(value: string) {
+  const first = normalizeText(value).charAt(0);
+  return /^[A-Z]$/.test(first) ? first : '#';
+}
 
 export default function ItemsPage() {
   useLoadItems();
@@ -162,13 +224,31 @@ export default function ItemsPage() {
   const isLoading = useItemStore((s) => s.isLoading);
   const error = useItemStore((s) => s.error);
   const reload = useItemStore((s) => s.reload);
-  const activeRoom = useUIStore((s) => s.activeRoom);
-  const setActiveRoom = useUIStore((s) => s.setActiveRoom);
   const [exportOpen, setExportOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [activeLetter, setActiveLetter] = useState<string | null>(null);
 
-  const filtered = activeRoom
-    ? items.filter((item) => item.location.room === activeRoom)
+  const textFiltered = query.trim()
+    ? items.filter((item) => {
+        const term = query.toLowerCase();
+        return (
+          item.name.toLowerCase().includes(term) ||
+          item.description?.toLowerCase().includes(term) ||
+          item.location.room.toLowerCase().includes(term) ||
+          item.location.spot.toLowerCase().includes(term) ||
+          item.tags.some((tag) => tag.toLowerCase().includes(term))
+        );
+      })
     : items;
+
+  const filtered = (
+    activeLetter
+      ? textFiltered.filter((item) => initialBucket(item.name) === activeLetter)
+      : textFiltered
+  ).sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+
+  const emptyQueryLabel =
+    query || (activeLetter ? `inicial ${activeLetter}` : '');
 
   return (
     <Page>
@@ -189,12 +269,18 @@ export default function ItemsPage() {
               {exportOpen && (
                 <ExportMenu>
                   <ExportOption
-                    onClick={() => { exportToCSV(items); setExportOpen(false); }}
+                    onClick={() => {
+                      exportToCSV(items);
+                      setExportOpen(false);
+                    }}
                   >
                     CSV (.csv)
                   </ExportOption>
                   <ExportOption
-                    onClick={() => { exportToJSON(items); setExportOpen(false); }}
+                    onClick={() => {
+                      exportToJSON(items);
+                      setExportOpen(false);
+                    }}
                   >
                     JSON (.json)
                   </ExportOption>
@@ -210,19 +296,53 @@ export default function ItemsPage() {
         </Actions>
       </Header>
 
-      <RoomSelector value={activeRoom} onChange={setActiveRoom} />
+      <Filters>
+        <SearchBar
+          value={query}
+          onChange={setQuery}
+          onClear={() => setQuery('')}
+          placeholder="Busca por nombre, etiqueta o ubicación..."
+        />
+
+        <LettersWrap>
+          <LetterButton
+            $active={activeLetter === null}
+            onClick={() => setActiveLetter(null)}
+          >
+            Todas
+          </LetterButton>
+          {letters.map((letter) => (
+            <LetterButton
+              key={letter}
+              $active={activeLetter === letter}
+              onClick={() => setActiveLetter(letter)}
+            >
+              {letter}
+            </LetterButton>
+          ))}
+          <LetterButton
+            $active={activeLetter === '#'}
+            onClick={() => setActiveLetter('#')}
+          >
+            #
+          </LetterButton>
+        </LettersWrap>
+      </Filters>
 
       {isLoading ? (
         <ItemListSkeleton count={6} />
       ) : error ? (
         <ErrorBanner>
-          <span>No se pudo conectar con el servidor. Comprueba tu conexión o inténtalo en unos minutos.</span>
+          <span>
+            No se pudo conectar con el servidor. Comprueba tu conexión o
+            inténtalo en unos minutos.
+          </span>
           <RetryButton onClick={() => void reload()}>Reintentar</RetryButton>
         </ErrorBanner>
       ) : items.length === 0 ? (
         <EmptyState />
       ) : (
-        <SearchResults items={filtered} query="" />
+        <SearchResults items={filtered} query={emptyQueryLabel} />
       )}
     </Page>
   );

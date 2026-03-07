@@ -5,7 +5,15 @@ import { useUIStore } from './uiStore';
 export interface Room {
   id: string;
   name: string;
+  description: string | null;
+  image_url: string | null;
   created_at: string;
+}
+
+export interface RoomInput {
+  name: string;
+  description?: string;
+  imageUrl?: string;
 }
 
 interface RoomState {
@@ -13,8 +21,8 @@ interface RoomState {
   isLoading: boolean;
   hasLoaded: boolean;
   loadRooms: () => Promise<void>;
-  addRoom: (name: string) => Promise<Room | null>;
-  updateRoom: (id: string, name: string) => Promise<Room | null>;
+  addRoom: (payload: RoomInput) => Promise<Room | null>;
+  updateRoom: (id: string, payload: RoomInput) => Promise<Room | null>;
   deleteRoom: (id: string) => Promise<boolean>;
 }
 
@@ -35,24 +43,27 @@ export const useRoomStore = create<RoomState>()(
         set({ isLoading: true }, false, 'loadRooms:start');
         try {
           const res = await fetch('/api/rooms', { cache: 'no-store' });
-          if (!res.ok) throw new Error('No se pudieron cargar las habitaciones');
+          if (!res.ok)
+            throw new Error('No se pudieron cargar las habitaciones');
           const rooms = (await res.json()) as Room[];
           set({ rooms, hasLoaded: true }, false, 'loadRooms:success');
         } catch (error) {
           toast.error(
-            error instanceof Error ? error.message : 'Error cargando habitaciones',
+            error instanceof Error
+              ? error.message
+              : 'Error cargando habitaciones',
           );
         } finally {
           set({ isLoading: false }, false, 'loadRooms:end');
         }
       },
 
-      addRoom: async (name) => {
+      addRoom: async (payload) => {
         try {
           const res = await fetch('/api/rooms', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name }),
+            body: JSON.stringify(payload),
           });
 
           if (!res.ok) {
@@ -62,7 +73,11 @@ export const useRoomStore = create<RoomState>()(
 
           const room = (await res.json()) as Room;
           set(
-            (state) => ({ rooms: [...state.rooms, room].sort((a, b) => a.name.localeCompare(b.name)) }),
+            (state) => ({
+              rooms: [...state.rooms, room].sort((a, b) =>
+                a.name.localeCompare(b.name),
+              ),
+            }),
             false,
             'addRoom:success',
           );
@@ -76,12 +91,12 @@ export const useRoomStore = create<RoomState>()(
         }
       },
 
-      updateRoom: async (id, name) => {
+      updateRoom: async (id, payload) => {
         try {
           const res = await fetch(`/api/rooms/${id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name }),
+            body: JSON.stringify(payload),
           });
 
           if (!res.ok) {
@@ -103,7 +118,9 @@ export const useRoomStore = create<RoomState>()(
           return room;
         } catch (error) {
           toast.error(
-            error instanceof Error ? error.message : 'Error actualizando habitación',
+            error instanceof Error
+              ? error.message
+              : 'Error actualizando habitación',
           );
           return null;
         }
@@ -127,7 +144,9 @@ export const useRoomStore = create<RoomState>()(
           return true;
         } catch (error) {
           toast.error(
-            error instanceof Error ? error.message : 'Error eliminando habitación',
+            error instanceof Error
+              ? error.message
+              : 'Error eliminando habitación',
           );
           return false;
         }

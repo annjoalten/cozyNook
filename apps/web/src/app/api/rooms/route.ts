@@ -4,6 +4,8 @@ import { getSupabaseAdmin } from '../../../lib/supabase/admin';
 
 const roomCreateSchema = z.object({
   name: z.string().min(1, 'El nombre es obligatorio').max(100),
+  description: z.string().max(300).optional(),
+  imageUrl: z.string().max(1000).optional(),
 });
 
 export async function GET() {
@@ -42,7 +44,11 @@ export async function POST(request: NextRequest) {
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
       .from('rooms')
-      .insert({ name: parsed.data.name })
+      .insert({
+        name: parsed.data.name,
+        description: parsed.data.description?.trim() || null,
+        image_url: parsed.data.imageUrl?.trim() || null,
+      })
       .select('*')
       .single();
 
