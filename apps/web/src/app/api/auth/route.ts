@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '../../../lib/rateLimit';
 
-// 20 intentos por 15 minutos por IP
-const RATE_LIMIT = { limit: 20, windowMs: 15 * 60 * 1000 };
+// 20 intentos por 5 minutos por IP
+const RATE_LIMIT = { limit: 20, windowMs: 5 * 60 * 1000 };
 
 export async function POST(request: NextRequest) {
   const ip =
