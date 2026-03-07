@@ -12,6 +12,7 @@ interface UIState {
   isAddModalOpen: boolean
   editingItemId: string | null
   toasts: Toast[]
+  customRooms: string[]
   setActiveRoom: (room: string | null) => void
   openAddModal: () => void
   closeAddModal: () => void
@@ -19,6 +20,7 @@ interface UIState {
   closeEditModal: () => void
   addToast: (message: string, type?: Toast['type']) => void
   removeToast: (id: string) => void
+  addCustomRoom: (room: string) => void
 }
 
 export const useUIStore = create<UIState>()(
@@ -28,6 +30,7 @@ export const useUIStore = create<UIState>()(
       isAddModalOpen: false,
       editingItemId: null,
       toasts: [],
+      customRooms: [],
 
       setActiveRoom: (room) =>
         set({ activeRoom: room }, false, 'setActiveRoom'),
@@ -61,6 +64,17 @@ export const useUIStore = create<UIState>()(
           (state) => ({ toasts: state.toasts.filter((t) => t.id !== id) }),
           false,
           'removeToast'
+        ),
+
+      addCustomRoom: (room) =>
+        set(
+          (state) => ({
+            customRooms: state.customRooms.includes(room)
+              ? state.customRooms
+              : [...state.customRooms, room],
+          }),
+          false,
+          'addCustomRoom'
         ),
     }),
     { name: 'nook/ui' }

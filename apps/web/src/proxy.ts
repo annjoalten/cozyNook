@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const PUBLIC_PATHS = ['/login', '/api/auth']
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
+  // If no password is configured, keep the app public.
+  if (!process.env.NOOK_PASSWORD) {
+    return NextResponse.next()
+  }
+
   const { pathname } = request.nextUrl
 
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {

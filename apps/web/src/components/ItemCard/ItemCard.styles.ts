@@ -44,3 +44,16 @@ export const Tags = styled.div`
   gap: 0.35rem;
   margin-top: auto;
 `
+
+export const MoreTag = styled.span`
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: ${({ theme }) => theme.radii.full};
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  font-weight: ${({ theme }) => theme.fontWeight.medium};
+  background: transparent;
+  border: 1px dashed ${({ theme }) => theme.colors.sand};
+  color: ${({ theme }) => theme.colors.taupe};
+`

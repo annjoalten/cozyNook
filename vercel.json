@@ -1,9 +1,5 @@
 {
-  "buildCommand": "cd apps/web && npm run build",
-  "outputDirectory": "apps/web/.next",
+  "buildCommand": "npx nx build web",
   "installCommand": "npm install",
-  "framework": "nextjs",
-  "env": {
-    "NOOK_PASSWORD": "@nook_password"
-  }
+  "framework": "nextjs"
 }

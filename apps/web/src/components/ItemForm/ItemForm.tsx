@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ROOMS } from '@nook/core'
 import { useItemStore } from '../../store/itemStore'
-import { Form, Field, Label, Input, Textarea, Select, ErrorMsg, Hint, Row, SubmitButton } from './ItemForm.styles'
+import { RoomDropdown } from '../RoomDropdown'
+import { Form, Field, Label, Input, Textarea, ErrorMsg, Hint, Row, SubmitButton } from './ItemForm.styles'
 import { itemSchema, type FormValues, type FormErrors, type ItemFormProps } from './ItemForm.types'
 
 export function ItemForm({ initial }: ItemFormProps) {
@@ -90,15 +90,11 @@ export function ItemForm({ initial }: ItemFormProps) {
 
       <Row>
         <Field>
-          <Label htmlFor="room">Habitación</Label>
-          <Select
-            id="room"
+          <Label>Habitación</Label>
+          <RoomDropdown
             value={values.location.room}
-            onChange={(e) => set('location.room', e.target.value)}
-          >
-            <option value="">Elige…</option>
-            {ROOMS.map((r) => <option key={r} value={r}>{r}</option>)}
-          </Select>
+            onChange={(room) => set('location.room', room)}
+          />
           {errors['location.room'] && <ErrorMsg>{errors['location.room']}</ErrorMsg>}
         </Field>
 

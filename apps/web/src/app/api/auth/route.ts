@@ -4,7 +4,11 @@ export async function POST(request: NextRequest) {
   const { password } = await request.json()
 
   const expected = process.env.NOOK_PASSWORD
-  if (!expected || password !== expected) {
+  if (!expected) {
+    return NextResponse.json({ ok: true, disabled: true })
+  }
+
+  if (password !== expected) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

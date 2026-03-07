@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import styled from 'styled-components'
 
 const Wrapper = styled.main`
@@ -18,7 +18,7 @@ const Card = styled.div`
   max-width: 380px;
   background: ${({ theme }) => theme.colors.cream};
   border-radius: ${({ theme }) => theme.radii.lg};
-  box-shadow: ${({ theme }) => theme.shadow.md};
+  box-shadow: ${({ theme }) => theme.shadow.elevated};
   padding: 2.5rem 2rem;
   display: flex;
   flex-direction: column;
@@ -26,7 +26,7 @@ const Card = styled.div`
 `
 
 const Title = styled.h1`
-  font-family: ${({ theme }) => theme.fontFamily.serif};
+  font-family: ${({ theme }) => theme.fontFamily.heading};
   font-size: ${({ theme }) => theme.fontSize['2xl']};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
   color: ${({ theme }) => theme.colors.bark};
@@ -35,7 +35,7 @@ const Title = styled.h1`
 `
 
 const Subtitle = styled.p`
-  font-family: ${({ theme }) => theme.fontFamily.sans};
+  font-family: ${({ theme }) => theme.fontFamily.body};
   font-size: ${({ theme }) => theme.fontSize.sm};
   color: ${({ theme }) => theme.colors.taupe};
   text-align: center;
@@ -49,7 +49,7 @@ const Form = styled.form`
 `
 
 const Input = styled.input`
-  font-family: ${({ theme }) => theme.fontFamily.sans};
+  font-family: ${({ theme }) => theme.fontFamily.body};
   font-size: ${({ theme }) => theme.fontSize.base};
   color: ${({ theme }) => theme.colors.bark};
   background: ${({ theme }) => theme.colors.parchment};
@@ -71,7 +71,7 @@ const Input = styled.input`
 `
 
 const Button = styled.button`
-  font-family: ${({ theme }) => theme.fontFamily.sans};
+  font-family: ${({ theme }) => theme.fontFamily.body};
   font-size: ${({ theme }) => theme.fontSize.base};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
   color: ${({ theme }) => theme.colors.cream};
@@ -93,7 +93,7 @@ const Button = styled.button`
 `
 
 const ErrorMsg = styled.p`
-  font-family: ${({ theme }) => theme.fontFamily.sans};
+  font-family: ${({ theme }) => theme.fontFamily.body};
   font-size: ${({ theme }) => theme.fontSize.sm};
   color: ${({ theme }) => theme.colors.terracotta};
   text-align: center;
@@ -102,7 +102,6 @@ const ErrorMsg = styled.p`
 
 export default function LoginPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -119,7 +118,10 @@ export default function LoginPage() {
     })
 
     if (res.ok) {
-      const from = searchParams.get('from') ?? '/'
+      const from =
+        typeof window !== 'undefined'
+          ? new URLSearchParams(window.location.search).get('from') ?? '/'
+          : '/'
       router.replace(from)
     } else {
       setError('Contraseña incorrecta. Inténtalo de nuevo.')
