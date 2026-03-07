@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const MAX_SIZE_MB = 5;
+const MAX_SIZE_MB = 10;
 
 interface UploadResult {
   publicUrl: string;

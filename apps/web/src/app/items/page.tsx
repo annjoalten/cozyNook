@@ -3,6 +3,7 @@
 import {
   DownloadSimpleIcon,
   PlusIcon,
+  ShoppingCartIcon,
   SquaresFourIcon,
 } from '@phosphor-icons/react';
 import Link from 'next/link';
@@ -255,6 +256,10 @@ export default function ItemsPage() {
       <Header>
         <Title>Tu inventario</Title>
         <Actions>
+          <RoomsLink href="/compra">
+            <ShoppingCartIcon size={16} weight="light" />
+            Compra
+          </RoomsLink>
           <RoomsLink href="/rooms">
             <SquaresFourIcon size={16} weight="light" />
             Estancias

@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, Trash } from '@phosphor-icons/react';
+import { ArrowLeft, ShoppingCart, Trash } from '@phosphor-icons/react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -13,6 +13,7 @@ import { TagBadge } from '../../../components/TagBadge';
 import { useLoadItems } from '../../../hooks/useLoadItems';
 import { isLowStock } from '../../../lib/stock';
 import { useItemStore } from '../../../store/itemStore';
+import { useShoppingListStore } from '../../../store/shoppingListStore';
 
 const Page = styled.main`
   max-width: 40rem;
@@ -144,8 +145,10 @@ export default function ItemDetailPage() {
   const getItemById = useItemStore((s) => s.getItemById);
   const deleteItem = useItemStore((s) => s.deleteItem);
   const hasLoaded = useItemStore((s) => s.hasLoaded);
+  const addToList = useShoppingListStore((s) => s.addEntry);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [addingToList, setAddingToList] = useState(false);
 
   const item = getItemById(id);
 
@@ -222,6 +225,17 @@ export default function ItemDetailPage() {
             );
           })()}
         <Actions>
+          <ActionButton
+            onClick={async () => {
+              setAddingToList(true);
+              await addToList({ item_id: item.id });
+              setAddingToList(false);
+            }}
+            disabled={addingToList}
+          >
+            <ShoppingCart size={15} weight="light" />
+            {addingToList ? 'Añadiendo…' : 'Añadir a la compra'}
+          </ActionButton>
           <ActionButton $danger onClick={() => setConfirmOpen(true)}>
             <Trash size={15} weight="light" />
             Eliminar

@@ -1,12 +1,14 @@
 'use client';
 
 import {
+  ArrowLeftIcon,
   CheckIcon,
   PlusIcon,
   ShoppingCartIcon,
   TrashIcon,
   XIcon,
 } from '@phosphor-icons/react';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useItemStore } from '../../store/itemStore';
@@ -29,6 +31,18 @@ const Header = styled.div`
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
+`;
+
+const Back = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.colors.taupe};
+  &:hover {
+    color: ${({ theme }) => theme.colors.bark};
+  }
 `;
 
 const Title = styled.h1`
@@ -301,6 +315,11 @@ export default function CompraPage() {
 
   return (
     <Page>
+      <Back href="/items">
+        <ArrowLeftIcon size={16} weight="light" />
+        Inventario
+      </Back>
+
       <Header>
         <Title>Lista de la compra</Title>
         <AddButton onClick={() => setShowForm((v) => !v)}>
