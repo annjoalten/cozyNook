@@ -43,15 +43,12 @@ export const useRoomStore = create<RoomState>()(
         set({ isLoading: true }, false, 'loadRooms:start');
         try {
           const res = await fetch('/api/rooms', { cache: 'no-store' });
-          if (!res.ok)
-            throw new Error('No se pudieron cargar las habitaciones');
+          if (!res.ok) throw new Error('No se pudieron cargar las estancias');
           const rooms = (await res.json()) as Room[];
           set({ rooms, hasLoaded: true }, false, 'loadRooms:success');
         } catch (error) {
           toast.error(
-            error instanceof Error
-              ? error.message
-              : 'Error cargando habitaciones',
+            error instanceof Error ? error.message : 'Error cargando estancias',
           );
         } finally {
           set({ isLoading: false }, false, 'loadRooms:end');

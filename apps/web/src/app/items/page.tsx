@@ -257,7 +257,7 @@ export default function ItemsPage() {
         <Actions>
           <RoomsLink href="/rooms">
             <SquaresFourIcon size={16} weight="light" />
-            Habitaciones
+            Estancias
           </RoomsLink>
 
           {items.length > 0 && (

@@ -1,7 +1,13 @@
 'use client';
 
 import { ROOMS } from '@nook/core';
-import { ArrowLeft, HouseLine, Plus, X } from '@phosphor-icons/react';
+import {
+  ArrowLeft,
+  HouseLine,
+  PencilSimpleLine,
+  Plus,
+  X,
+} from '@phosphor-icons/react';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -178,20 +184,6 @@ const Submit = styled.button`
   }
 `;
 
-const RoomCard = styled(Link)`
-  background: ${({ theme }) => theme.colors.white};
-  border-radius: ${({ theme }) => theme.radii.lg};
-  box-shadow: ${({ theme }) => theme.shadow.card};
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-
-  &:hover {
-    transform: translateY(-2px);
-    transition: transform 0.15s ease;
-  }
-`;
-
 const Cover = styled.div<{ $bg: string; $image?: string }>`
   height: 7.25rem;
   width: 100%;
@@ -255,11 +247,13 @@ export default function RoomsPage() {
   const hasLoadedRooms = useRoomStore((s) => s.hasLoaded);
   const loadRooms = useRoomStore((s) => s.loadRooms);
   const addRoom = useRoomStore((s) => s.addRoom);
+  const updateRoom = useRoomStore((s) => s.updateRoom);
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newImageUrl, setNewImageUrl] = useState<string | undefined>();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isSavingRoom, setIsSavingRoom] = useState(false);
+  const [editingRoomId, setEditingRoomId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!hasLoadedRooms) {
@@ -296,26 +290,56 @@ export default function RoomsPage() {
       a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }),
     );
 
-  const handleCreateRoom = async (event: React.FormEvent<HTMLFormElement>) => {
+  const openCreateModal = () => {
+    setEditingRoomId(null);
+    setNewTitle('');
+    setNewDescription('');
+    setNewImageUrl(undefined);
+    setIsCreateOpen(true);
+  };
+
+  const openEditModal = (room: {
+    id?: string;
+    name: string;
+    description?: string | null;
+    image_url?: string | null;
+  }) => {
+    setEditingRoomId(room.id ?? null);
+    setNewTitle(room.name);
+    setNewDescription(room.description ?? '');
+    setNewImageUrl(room.image_url ?? undefined);
+    setIsCreateOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsCreateOpen(false);
+    setEditingRoomId(null);
+    setNewTitle('');
+    setNewDescription('');
+    setNewImageUrl(undefined);
+  };
+
+  const handleSaveRoom = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const name = newTitle.trim();
     if (!name || isSavingRoom) return;
 
     setIsSavingRoom(true);
 
-    const created = await addRoom({
+    const payload = {
       name,
       description: newDescription.trim() || undefined,
       imageUrl: newImageUrl,
-    });
+    };
+
+    const saved = editingRoomId
+      ? await updateRoom(editingRoomId, payload)
+      : await addRoom(payload);
 
     setIsSavingRoom(false);
 
-    if (created) {
-      setNewTitle('');
-      setNewDescription('');
-      setNewImageUrl(undefined);
-      setIsCreateOpen(false);
+    if (saved) {
+      closeModal();
     }
   };
 
@@ -333,33 +357,36 @@ export default function RoomsPage() {
             Explora por estancia y entra para ver sus objetos.
           </Subtitle>
         </div>
-        <CreateButton type="button" onClick={() => setIsCreateOpen(true)}>
+        <CreateButton type="button" onClick={openCreateModal}>
           <Plus size={16} weight="bold" />
           Crear estancia
         </CreateButton>
       </Header>
 
       {isCreateOpen ? (
-        <ModalOverlay onClick={() => setIsCreateOpen(false)}>
+        <ModalOverlay onClick={closeModal}>
           <ModalCard onClick={(event) => event.stopPropagation()}>
             <ModalHeader>
               <div>
-                <CreatorTitle>Crear estancia</CreatorTitle>
+                <CreatorTitle>
+                  {editingRoomId ? 'Editar estancia' : 'Crear estancia'}
+                </CreatorTitle>
                 <CreatorHint>
-                  Añade título, descripción e imagen para personalizar tus
-                  estancias.
+                  {editingRoomId
+                    ? 'Actualiza título, descripción e imagen de esta estancia.'
+                    : 'Añade título, descripción e imagen para personalizar tus estancias.'}
                 </CreatorHint>
               </div>
               <CloseButton
                 type="button"
                 aria-label="Cerrar modal"
-                onClick={() => setIsCreateOpen(false)}
+                onClick={closeModal}
               >
                 <X size={16} weight="bold" />
               </CloseButton>
             </ModalHeader>
 
-            <CreatorForm onSubmit={handleCreateRoom}>
+            <CreatorForm onSubmit={handleSaveRoom}>
               <Input
                 value={newTitle}
                 onChange={(event) => setNewTitle(event.target.value)}
@@ -373,7 +400,11 @@ export default function RoomsPage() {
               />
               <ImageUpload value={newImageUrl} onChange={setNewImageUrl} />
               <Submit type="submit" disabled={isSavingRoom || !newTitle.trim()}>
-                {isSavingRoom ? 'Guardando...' : 'Guardar estancia'}
+                {isSavingRoom
+                  ? 'Guardando...'
+                  : editingRoomId
+                    ? 'Guardar cambios'
+                    : 'Guardar estancia'}
               </Submit>
             </CreatorForm>
           </ModalCard>
@@ -401,23 +432,38 @@ export default function RoomsPage() {
             const coverImage = room.meta?.image_url ?? cover.image;
             const description = room.meta?.description?.trim();
             return (
-              <RoomCard
-                key={room.name}
-                href={`/rooms/${encodeURIComponent(room.name)}`}
-              >
-                <Cover
-                  $bg={cover.background}
-                  $image={coverImage ?? undefined}
-                />
-                <CardBody>
-                  <RoomName>{room.name}</RoomName>
-                  <ItemCount>
-                    {room.count} {room.count === 1 ? 'item' : 'items'}
-                  </ItemCount>
-                  {description ? (
-                    <RoomDescription>{description}</RoomDescription>
-                  ) : null}
-                </CardBody>
+              <RoomCard key={room.name}>
+                <EditButton
+                  type="button"
+                  aria-label={`Editar ${room.name}`}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    openEditModal({
+                      id: room.meta?.id,
+                      name: room.name,
+                      description: room.meta?.description,
+                      image_url: room.meta?.image_url,
+                    });
+                  }}
+                >
+                  <PencilSimpleLine size={14} weight="bold" />
+                </EditButton>
+                <RoomLink href={`/rooms/${encodeURIComponent(room.name)}`}>
+                  <Cover
+                    $bg={cover.background}
+                    $image={coverImage ?? undefined}
+                  />
+                  <CardBody>
+                    <RoomName>{room.name}</RoomName>
+                    <ItemCount>
+                      {room.count} {room.count === 1 ? 'item' : 'items'}
+                    </ItemCount>
+                    {description ? (
+                      <RoomDescription>{description}</RoomDescription>
+                    ) : null}
+                  </CardBody>
+                </RoomLink>
               </RoomCard>
             );
           })}
@@ -426,3 +472,43 @@ export default function RoomsPage() {
     </Page>
   );
 }
+
+const RoomCard = styled.article`
+  position: relative;
+  background: ${({ theme }) => theme.colors.white};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  box-shadow: ${({ theme }) => theme.shadow.card};
+  overflow: hidden;
+`;
+
+const RoomLink = styled(Link)`
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    transform: translateY(-2px);
+    transition: transform 0.15s ease;
+  }
+`;
+
+const EditButton = styled.button`
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: ${({ theme }) => theme.colors.bark};
+  box-shadow: ${({ theme }) => theme.shadow.card};
+  cursor: pointer;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.white};
+  }
+`;
