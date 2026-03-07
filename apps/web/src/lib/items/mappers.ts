@@ -40,9 +40,16 @@ export function itemToDbInsert(item: Omit<Item, 'id' | 'createdAt'>) {
   };
 }
 
-export function itemPatchToDbUpdate(
-  patch: Partial<Omit<Item, 'id' | 'createdAt'>>,
-) {
+type PatchInput = {
+  name?: string;
+  description?: string | null;
+  location?: { room: string; spot: string };
+  tags?: string[];
+  category?: string | null;
+  imageUrl?: string | null;
+};
+
+export function itemPatchToDbUpdate(patch: PatchInput) {
   const payload: Record<string, unknown> = {};
 
   if (patch.name !== undefined) payload.name = patch.name;
