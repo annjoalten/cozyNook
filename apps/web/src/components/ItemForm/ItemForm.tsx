@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useItemStore } from '../../store/itemStore';
 import { ImageUpload } from '../ImageUpload';
 import { RoomDropdown } from '../RoomDropdown';
@@ -38,7 +38,11 @@ const initialStock = (initial?: ItemFormProps['initial']): StockFormState => ({
 
 export function ItemForm({ initial }: ItemFormProps) {
   const router = useRouter();
-  const { addItem, updateItem } = useItemStore();
+  const { addItem, updateItem, items, hasLoaded, loadItems } = useItemStore();
+
+  useEffect(() => {
+    if (!hasLoaded) loadItems();
+  }, [hasLoaded, loadItems]);
   const isEdit = !!initial;
 
   const [values, setValues] = useState<FormValues>({
@@ -51,6 +55,16 @@ export function ItemForm({ initial }: ItemFormProps) {
     tags: initial?.tags.join(', ') ?? '',
     category: initial?.category ?? '',
   });
+  const spotSuggestions = useMemo(() => {
+    if (!values.location.room) return [];
+    return [...new Set(
+      items
+        .filter((i) => i.location.room === values.location.room)
+        .map((i) => i.location.spot)
+        .filter(Boolean),
+    )];
+  }, [items, values.location.room]);
+
   const [imageUrl, setImageUrl] = useState<string | undefined>(initial?.imageUrl);
   const [stock, setStock] = useState<StockFormState>(initialStock(initial));
   const [errors, setErrors] = useState<FormErrors>({});
@@ -157,7 +171,7 @@ export function ItemForm({ initial }: ItemFormProps) {
 
       <Row>
         <Field>
-          <Label>Habitación</Label>
+          <Label>Estancia</Label>
           <RoomDropdown
             value={values.location.room}
             onChange={(room) => set('location.room', room)}
@@ -171,10 +185,18 @@ export function ItemForm({ initial }: ItemFormProps) {
           <Label htmlFor="spot">Lugar exacto</Label>
           <Input
             id="spot"
+            list="spot-suggestions"
             value={values.location.spot}
             onChange={(e) => set('location.spot', e.target.value)}
             placeholder="Cajón izquierdo, estante alto…"
           />
+          {spotSuggestions.length > 0 && (
+            <datalist id="spot-suggestions">
+              {spotSuggestions.map((s) => (
+                <option key={s} value={s} />
+              ))}
+            </datalist>
+          )}
           {errors['location.spot'] && (
             <ErrorMsg>{errors['location.spot']}</ErrorMsg>
           )}
