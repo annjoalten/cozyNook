@@ -1,9 +1,9 @@
-import styled from 'styled-components'
+import styled from 'styled-components';
 
 export const Wrapper = styled.div`
   position: relative;
   width: 100%;
-`
+`;
 
 export const Trigger = styled.button<{ $hasValue: boolean }>`
   width: 100%;
@@ -26,7 +26,7 @@ export const Trigger = styled.button<{ $hasValue: boolean }>`
     outline: none;
     border-color: ${({ theme }) => theme.colors.sand};
   }
-`
+`;
 
 export const Panel = styled.div`
   position: absolute;
@@ -41,7 +41,7 @@ export const Panel = styled.div`
   max-height: 14rem;
   overflow-y: auto;
   padding: 0.25rem;
-`
+`;
 
 export const Option = styled.button<{ $selected: boolean }>`
   width: 100%;
@@ -60,7 +60,7 @@ export const Option = styled.button<{ $selected: boolean }>`
   &:hover {
     background: ${({ theme }) => theme.colors.parchment};
   }
-`
+`;
 
 export const AddRoomRow = styled.div`
   display: flex;
@@ -70,7 +70,7 @@ export const AddRoomRow = styled.div`
   border-top: 1px solid ${({ theme }) => theme.colors.cream};
   margin-top: 0.25rem;
   color: ${({ theme }) => theme.colors.taupe};
-`
+`;
 
 export const AddRoomInput = styled.input`
   flex: 1;
@@ -84,4 +84,4 @@ export const AddRoomInput = styled.input`
   &::placeholder {
     color: ${({ theme }) => theme.colors.taupe};
   }
-`
+`;

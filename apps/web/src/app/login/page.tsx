@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import styled from 'styled-components'
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import styled from 'styled-components';
 
 const Wrapper = styled.main`
   min-height: 100dvh;
@@ -11,7 +11,7 @@ const Wrapper = styled.main`
   justify-content: center;
   padding: 2rem;
   background-color: ${({ theme }) => theme.colors.parchment};
-`
+`;
 
 const Card = styled.div`
   width: 100%;
@@ -23,7 +23,7 @@ const Card = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-`
+`;
 
 const Title = styled.h1`
   font-family: ${({ theme }) => theme.fontFamily.heading};
@@ -32,7 +32,7 @@ const Title = styled.h1`
   color: ${({ theme }) => theme.colors.bark};
   text-align: center;
   margin: 0;
-`
+`;
 
 const Subtitle = styled.p`
   font-family: ${({ theme }) => theme.fontFamily.body};
@@ -40,13 +40,13 @@ const Subtitle = styled.p`
   color: ${({ theme }) => theme.colors.taupe};
   text-align: center;
   margin: 0;
-`
+`;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-`
+`;
 
 const Input = styled.input`
   font-family: ${({ theme }) => theme.fontFamily.body};
@@ -68,7 +68,7 @@ const Input = styled.input`
     color: ${({ theme }) => theme.colors.taupe};
     opacity: 0.6;
   }
-`
+`;
 
 const Button = styled.button`
   font-family: ${({ theme }) => theme.fontFamily.body};
@@ -90,7 +90,7 @@ const Button = styled.button`
     opacity: 0.5;
     cursor: not-allowed;
   }
-`
+`;
 
 const ErrorMsg = styled.p`
   font-family: ${({ theme }) => theme.fontFamily.body};
@@ -98,34 +98,34 @@ const ErrorMsg = styled.p`
   color: ${({ theme }) => theme.colors.terracotta};
   text-align: center;
   margin: 0;
-`
+`;
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const router = useRouter();
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
     const res = await fetch('/api/auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password }),
-    })
+    });
 
     if (res.ok) {
       const from =
         typeof window !== 'undefined'
-          ? new URLSearchParams(window.location.search).get('from') ?? '/'
-          : '/'
-      router.replace(from)
+          ? (new URLSearchParams(window.location.search).get('from') ?? '/')
+          : '/';
+      router.replace(from);
     } else {
-      setError('Contraseña incorrecta. Inténtalo de nuevo.')
-      setLoading(false)
+      setError('Contraseña incorrecta. Inténtalo de nuevo.');
+      setLoading(false);
     }
   }
 
@@ -151,5 +151,5 @@ export default function LoginPage() {
         {error && <ErrorMsg>{error}</ErrorMsg>}
       </Card>
     </Wrapper>
-  )
+  );
 }
