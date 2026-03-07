@@ -251,6 +251,7 @@ export default function RoomsPage() {
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newImageUrl, setNewImageUrl] = useState<string | undefined>();
+  const [displayImageUrl, setDisplayImageUrl] = useState<string | undefined>();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isSavingRoom, setIsSavingRoom] = useState(false);
   const [editingRoomId, setEditingRoomId] = useState<string | null>(null);
@@ -301,6 +302,7 @@ export default function RoomsPage() {
     setNewTitle('');
     setNewDescription('');
     setNewImageUrl(undefined);
+    setDisplayImageUrl(undefined);
     setIsCreateOpen(true);
   };
 
@@ -310,10 +312,12 @@ export default function RoomsPage() {
     description?: string | null;
     image_url?: string | null;
   }) => {
+    const cover = getRoomCover(room.name);
     setEditingRoomId(room.id ?? null);
     setNewTitle(room.name);
     setNewDescription(room.description ?? '');
     setNewImageUrl(room.image_url ?? undefined);
+    setDisplayImageUrl(room.image_url ?? cover.image ?? undefined);
     setIsCreateOpen(true);
   };
 
@@ -323,6 +327,7 @@ export default function RoomsPage() {
     setNewTitle('');
     setNewDescription('');
     setNewImageUrl(undefined);
+    setDisplayImageUrl(undefined);
   };
 
   const handleSaveRoom = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -404,7 +409,15 @@ export default function RoomsPage() {
                 placeholder="Descripción corta"
                 maxLength={300}
               />
-              <ImageUpload value={newImageUrl} onChange={setNewImageUrl} />
+              <ImageUpload
+                value={newImageUrl}
+                displayValue={displayImageUrl}
+                showRemove={!editingRoomId}
+                onChange={(url) => {
+                  setNewImageUrl(url);
+                  setDisplayImageUrl(url);
+                }}
+              />
               <Submit type="submit" disabled={isSavingRoom || !newTitle.trim()}>
                 {isSavingRoom
                   ? 'Guardando...'

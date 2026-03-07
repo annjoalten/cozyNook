@@ -1,25 +1,40 @@
 'use client';
 
-import { ImageIcon, SpinnerGapIcon, TrashIcon } from '@phosphor-icons/react';
+import {
+  ImageIcon,
+  PencilSimpleLine,
+  SpinnerGapIcon,
+  TrashIcon,
+} from '@phosphor-icons/react';
 import { useRef } from 'react';
 import { useImageUpload } from '../../hooks/useImageUpload';
 import {
   ClearButton,
   DropZone,
+  EditOverlayButton,
   ErrorMsg,
   Preview,
+  PreviewFrame,
   PreviewWrap,
   Spinner,
 } from './ImageUpload.styles';
 
 interface ImageUploadProps {
   value?: string;
+  displayValue?: string;
+  showRemove?: boolean;
   onChange: (url: string | undefined) => void;
 }
 
-export function ImageUpload({ value, onChange }: ImageUploadProps) {
+export function ImageUpload({
+  value,
+  displayValue,
+  showRemove = true,
+  onChange,
+}: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const { upload, isUploading, error } = useImageUpload();
+  const previewSrc = value ?? displayValue;
 
   const handleFile = async (file: File) => {
     const result = await upload(file);
@@ -39,17 +54,36 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
 
   return (
     <div>
-      {value ? (
+      {previewSrc ? (
         <PreviewWrap>
-          <Preview src={value} alt="Vista previa" />
-          <ClearButton
-            type="button"
-            onClick={() => onChange(undefined)}
-            aria-label="Eliminar imagen"
-          >
-            <TrashIcon size={14} weight="bold" />
-            Eliminar
-          </ClearButton>
+          <PreviewFrame>
+            <Preview src={previewSrc} alt="Vista previa" />
+            <EditOverlayButton
+              type="button"
+              onClick={() => !isUploading && inputRef.current?.click()}
+              aria-label="Editar imagen"
+              disabled={isUploading}
+            >
+              <PencilSimpleLine size={14} weight="bold" />
+            </EditOverlayButton>
+          </PreviewFrame>
+          {showRemove && value ? (
+            <ClearButton
+              type="button"
+              onClick={() => onChange(undefined)}
+              aria-label="Eliminar imagen"
+            >
+              <TrashIcon size={14} weight="bold" />
+              Eliminar
+            </ClearButton>
+          ) : null}
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            style={{ display: 'none' }}
+            onChange={handleChange}
+          />
         </PreviewWrap>
       ) : (
         <DropZone
@@ -68,9 +102,7 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
             <ImageIcon size={24} weight="light" />
           )}
           <span>
-            {isUploading
-              ? 'Subiendo…'
-              : 'Haz clic o arrastra una imagen aquí'}
+            {isUploading ? 'Subiendo…' : 'Haz clic o arrastra una imagen aquí'}
           </span>
           <input
             ref={inputRef}

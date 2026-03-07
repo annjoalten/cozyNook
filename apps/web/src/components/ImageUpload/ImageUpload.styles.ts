@@ -42,6 +42,10 @@ export const PreviewWrap = styled.div`
   gap: 0.5rem;
 `;
 
+export const PreviewFrame = styled.div`
+  position: relative;
+`;
+
 export const Preview = styled.img`
   width: 100%;
   height: 14rem;
@@ -49,6 +53,33 @@ export const Preview = styled.img`
   background: ${({ theme }) => theme.colors.parchment};
   border-radius: ${({ theme }) => theme.radii.lg};
   border: 1.5px solid ${({ theme }) => theme.colors.cream};
+`;
+
+export const EditOverlayButton = styled.button`
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: ${({ theme }) => theme.colors.bark};
+  box-shadow: ${({ theme }) => theme.shadow.card};
+  cursor: pointer;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.white};
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
 `;
 
 export const ClearButton = styled.button`
