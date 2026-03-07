@@ -1,0 +1,19 @@
+{
+  "name": "ui-tokens",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/ui-tokens/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/ui-tokens",
+        "main": "packages/ui-tokens/src/index.ts",
+        "tsConfig": "packages/ui-tokens/tsconfig.lib.json",
+        "assets": ["packages/ui-tokens/*.md"]
+      }
+    }
+  },
+  "tags": []
+}

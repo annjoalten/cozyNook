@@ -1,0 +1,22 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "ES2022",
+    "lib": ["ES2022", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@nook/core": ["packages/core/src/index.ts"],
+      "@nook/ui-tokens": ["packages/ui-tokens/src/index.ts"],
+      "@nook/storage": ["packages/storage/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

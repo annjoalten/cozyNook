@@ -1,0 +1,22 @@
+
+.nx/installation
+.nx/cache
+.nx/workspace-data
+node_modules
+
+# build outputs
+dist
+
+# Next.js
+.next
+out
+
+# env
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+
+storybook-static
