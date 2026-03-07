@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { EmptyState } from '../../components/EmptyState';
 import { RoomSelector } from '../../components/RoomSelector';
 import { SearchResults } from '../../components/SearchResults';
+import { useLoadItems } from '../../hooks/useLoadItems';
 import { useItemStore } from '../../store/itemStore';
 import { useUIStore } from '../../store/uiStore';
 
@@ -50,7 +51,11 @@ const AddButton = styled(Link)`
 `;
 
 export default function ItemsPage() {
+  useLoadItems();
+
   const items = useItemStore((s) => s.items);
+  const isLoading = useItemStore((s) => s.isLoading);
+  const error = useItemStore((s) => s.error);
   const activeRoom = useUIStore((s) => s.activeRoom);
   const setActiveRoom = useUIStore((s) => s.setActiveRoom);
 
@@ -70,7 +75,11 @@ export default function ItemsPage() {
 
       <RoomSelector value={activeRoom} onChange={setActiveRoom} />
 
-      {items.length === 0 ? (
+      {error && <p>Error: {error}</p>}
+
+      {isLoading ? (
+        <p>Cargando inventario...</p>
+      ) : items.length === 0 ? (
         <EmptyState />
       ) : (
         <SearchResults items={filtered} query="" />

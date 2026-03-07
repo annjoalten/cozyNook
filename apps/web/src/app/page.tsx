@@ -1,19 +1,20 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import styled from 'styled-components'
-import { Plus } from '@phosphor-icons/react'
-import { useItemStore } from '../store/itemStore'
-import { useSearch } from '../hooks/useSearch'
-import { SearchBar } from '../components/SearchBar'
-import { SearchResults } from '../components/SearchResults'
-import { SuggestionBanner } from '../components/SuggestionBanner'
-import { ItemCard } from '../components/ItemCard'
+import { Plus } from '@phosphor-icons/react';
+import Link from 'next/link';
+import styled from 'styled-components';
+import { ItemCard } from '../components/ItemCard';
+import { SearchBar } from '../components/SearchBar';
+import { SearchResults } from '../components/SearchResults';
+import { SuggestionBanner } from '../components/SuggestionBanner';
+import { useLoadItems } from '../hooks/useLoadItems';
+import { useSearch } from '../hooks/useSearch';
+import { useItemStore } from '../store/itemStore';
 
 const Page = styled.main`
   min-height: 100vh;
   padding: 0 1rem 4rem;
-`
+`;
 
 const Hero = styled.section`
   display: flex;
@@ -22,7 +23,7 @@ const Hero = styled.section`
   padding: 4rem 1rem 3rem;
   gap: 1rem;
   text-align: center;
-`
+`;
 
 const Title = styled.h1`
   font-family: ${({ theme }) => theme.fontFamily.heading};
@@ -30,14 +31,14 @@ const Title = styled.h1`
   font-weight: ${({ theme }) => theme.fontWeight.medium};
   color: ${({ theme }) => theme.colors.bark};
   line-height: ${({ theme }) => theme.lineHeight.tight};
-`
+`;
 
 const Subtitle = styled.p`
   font-family: ${({ theme }) => theme.fontFamily.body};
   font-size: ${({ theme }) => theme.fontSize.base};
   color: ${({ theme }) => theme.colors.taupe};
   max-width: 32rem;
-`
+`;
 
 const Container = styled.div`
   max-width: 56rem;
@@ -45,19 +46,19 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-`
+`;
 
 const SectionHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-`
+`;
 
 const SectionTitle = styled.h2`
   font-family: ${({ theme }) => theme.fontFamily.heading};
   font-size: ${({ theme }) => theme.fontSize.xl};
   color: ${({ theme }) => theme.colors.bark};
-`
+`;
 
 const ViewAll = styled(Link)`
   font-family: ${({ theme }) => theme.fontFamily.body};
@@ -65,8 +66,10 @@ const ViewAll = styled(Link)`
   color: ${({ theme }) => theme.colors.taupe};
   text-decoration: underline;
   text-underline-offset: 3px;
-  &:hover { color: ${({ theme }) => theme.colors.bark}; }
-`
+  &:hover {
+    color: ${({ theme }) => theme.colors.bark};
+  }
+`;
 
 const AddButton = styled(Link)`
   display: inline-flex;
@@ -80,27 +83,35 @@ const AddButton = styled(Link)`
   font-size: ${({ theme }) => theme.fontSize.sm};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
   transition: background 0.15s ease;
-  &:hover { background: ${({ theme }) => theme.colors.clay}; }
-`
+  &:hover {
+    background: ${({ theme }) => theme.colors.clay};
+  }
+`;
 
 const Grid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
   gap: 1rem;
-`
+`;
 
 const EmptyHint = styled.p`
   font-family: ${({ theme }) => theme.fontFamily.body};
   color: ${({ theme }) => theme.colors.taupe};
-`
+`;
 
 export default function HomePage() {
-  const items = useItemStore((s) => s.items)
-  const { query, results, suggestions, isSearching, setQuery, clearSearch } = useSearch()
+  useLoadItems();
+
+  const items = useItemStore((s) => s.items);
+  const { query, results, suggestions, isSearching, setQuery, clearSearch } =
+    useSearch();
 
   const recent = [...items]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 6)
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
+    .slice(0, 6);
 
   return (
     <Page>
@@ -132,7 +143,9 @@ export default function HomePage() {
             </SectionHeader>
             {recent.length > 0 ? (
               <Grid style={{ marginTop: '1rem' }}>
-                {recent.map((item) => <ItemCard key={item.id} item={item} />)}
+                {recent.map((item) => (
+                  <ItemCard key={item.id} item={item} />
+                ))}
               </Grid>
             ) : (
               <EmptyHint>
@@ -143,5 +156,5 @@ export default function HomePage() {
         )}
       </Container>
     </Page>
-  )
+  );
 }

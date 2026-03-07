@@ -1,13 +1,14 @@
-'use client'
+'use client';
 
-import { useParams, useRouter } from 'next/navigation'
-import Link from 'next/link'
-import styled from 'styled-components'
-import { ArrowLeft, PencilSimple, Trash } from '@phosphor-icons/react'
-import { useItemStore } from '../../../store/itemStore'
-import { LocationBreadcrumb } from '../../../components/LocationBreadcrumb'
-import { TagBadge } from '../../../components/TagBadge'
-import { ItemForm } from '../../../components/ItemForm'
+import { ArrowLeft, PencilSimple, Trash } from '@phosphor-icons/react';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import styled from 'styled-components';
+import { ItemForm } from '../../../components/ItemForm';
+import { LocationBreadcrumb } from '../../../components/LocationBreadcrumb';
+import { TagBadge } from '../../../components/TagBadge';
+import { useLoadItems } from '../../../hooks/useLoadItems';
+import { useItemStore } from '../../../store/itemStore';
 
 const Page = styled.main`
   max-width: 40rem;
@@ -16,7 +17,7 @@ const Page = styled.main`
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-`
+`;
 
 const Back = styled(Link)`
   display: inline-flex;
@@ -25,8 +26,10 @@ const Back = styled(Link)`
   font-family: ${({ theme }) => theme.fontFamily.body};
   font-size: ${({ theme }) => theme.fontSize.sm};
   color: ${({ theme }) => theme.colors.taupe};
-  &:hover { color: ${({ theme }) => theme.colors.bark}; }
-`
+  &:hover {
+    color: ${({ theme }) => theme.colors.bark};
+  }
+`;
 
 const Card = styled.div`
   background: #fff;
@@ -36,34 +39,34 @@ const Card = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-`
+`;
 
 const Name = styled.h1`
   font-family: ${({ theme }) => theme.fontFamily.heading};
   font-size: ${({ theme }) => theme.fontSize['2xl']};
   color: ${({ theme }) => theme.colors.bark};
   line-height: ${({ theme }) => theme.lineHeight.snug};
-`
+`;
 
 const Description = styled.p`
   font-family: ${({ theme }) => theme.fontFamily.body};
   font-size: ${({ theme }) => theme.fontSize.base};
   color: ${({ theme }) => theme.colors.taupe};
   line-height: ${({ theme }) => theme.lineHeight.relaxed};
-`
+`;
 
 const Tags = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
-`
+`;
 
 const Actions = styled.div`
   display: flex;
   gap: 0.75rem;
   padding-top: 0.5rem;
   border-top: 1px solid ${({ theme }) => theme.colors.cream};
-`
+`;
 
 const ActionButton = styled.button<{ $danger?: boolean }>`
   display: inline-flex;
@@ -76,8 +79,9 @@ const ActionButton = styled.button<{ $danger?: boolean }>`
   font-weight: ${({ theme }) => theme.fontWeight.medium};
   cursor: pointer;
   transition: all 0.15s ease;
-  border: 1.5px solid ${({ $danger, theme }) =>
-    $danger ? theme.colors.terracotta : theme.colors.cream};
+  border: 1.5px solid
+    ${({ $danger, theme }) =>
+      $danger ? theme.colors.terracotta : theme.colors.cream};
   background: transparent;
   color: ${({ $danger, theme }) =>
     $danger ? theme.colors.terracotta : theme.colors.bark};
@@ -88,42 +92,62 @@ const ActionButton = styled.button<{ $danger?: boolean }>`
     color: ${({ theme }) => theme.colors.parchment};
     border-color: transparent;
   }
-`
+`;
 
 const EditTitle = styled.h2`
   font-family: ${({ theme }) => theme.fontFamily.heading};
   font-size: ${({ theme }) => theme.fontSize.xl};
   color: ${({ theme }) => theme.colors.bark};
-`
+`;
 
 const NotFound = styled.p`
   font-family: ${({ theme }) => theme.fontFamily.body};
   color: ${({ theme }) => theme.colors.taupe};
-`
+`;
 
 export default function ItemDetailPage() {
-  const { id } = useParams<{ id: string }>()
-  const router = useRouter()
-  const getItemById = useItemStore((s) => s.getItemById)
-  const deleteItem = useItemStore((s) => s.deleteItem)
+  useLoadItems();
 
-  const item = getItemById(id)
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const getItemById = useItemStore((s) => s.getItemById);
+  const deleteItem = useItemStore((s) => s.deleteItem);
+  const hasLoaded = useItemStore((s) => s.hasLoaded);
+
+  const item = getItemById(id);
+
+  if (!hasLoaded) {
+    return (
+      <Page>
+        <Back href="/items">
+          <ArrowLeft size={16} weight="light" />
+          Volver
+        </Back>
+        <NotFound>Cargando objeto...</NotFound>
+      </Page>
+    );
+  }
 
   if (!item) {
     return (
       <Page>
-        <Back href="/items"><ArrowLeft size={16} weight="light" />Volver</Back>
+        <Back href="/items">
+          <ArrowLeft size={16} weight="light" />
+          Volver
+        </Back>
         <NotFound>Objeto no encontrado.</NotFound>
       </Page>
-    )
+    );
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (window.confirm(`¿Eliminar "${item.name}"?`)) {
-      deleteItem(id)
-      router.push('/items')
+      const ok = await deleteItem(id);
+      if (ok) {
+        router.push('/items');
+      }
     }
-  }
+  };
 
   return (
     <Page>
@@ -135,14 +159,25 @@ export default function ItemDetailPage() {
       <Card>
         <Name>{item.name}</Name>
         {item.description && <Description>{item.description}</Description>}
-        <LocationBreadcrumb room={item.location.room} spot={item.location.spot} />
+        <LocationBreadcrumb
+          room={item.location.room}
+          spot={item.location.spot}
+        />
         {item.tags.length > 0 && (
           <Tags>
-            {item.tags.map((tag) => <TagBadge key={tag} label={tag} />)}
+            {item.tags.map((tag) => (
+              <TagBadge key={tag} label={tag} />
+            ))}
           </Tags>
         )}
         <Actions>
-          <ActionButton onClick={() => document.getElementById('edit-form')?.scrollIntoView({ behavior: 'smooth' })}>
+          <ActionButton
+            onClick={() =>
+              document
+                .getElementById('edit-form')
+                ?.scrollIntoView({ behavior: 'smooth' })
+            }
+          >
             <PencilSimple size={15} weight="light" />
             Editar
           </ActionButton>
@@ -156,5 +191,5 @@ export default function ItemDetailPage() {
       <EditTitle id="edit-form">Editar objeto</EditTitle>
       <ItemForm initial={item} />
     </Page>
-  )
+  );
 }

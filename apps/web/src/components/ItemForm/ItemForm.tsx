@@ -1,16 +1,31 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useItemStore } from '../../store/itemStore'
-import { RoomDropdown } from '../RoomDropdown'
-import { Form, Field, Label, Input, Textarea, ErrorMsg, Hint, Row, SubmitButton } from './ItemForm.styles'
-import { itemSchema, type FormValues, type FormErrors, type ItemFormProps } from './ItemForm.types'
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useItemStore } from '../../store/itemStore';
+import { RoomDropdown } from '../RoomDropdown';
+import {
+  ErrorMsg,
+  Field,
+  Form,
+  Hint,
+  Input,
+  Label,
+  Row,
+  SubmitButton,
+  Textarea,
+} from './ItemForm.styles';
+import {
+  itemSchema,
+  type FormErrors,
+  type FormValues,
+  type ItemFormProps,
+} from './ItemForm.types';
 
 export function ItemForm({ initial }: ItemFormProps) {
-  const router = useRouter()
-  const { addItem, updateItem } = useItemStore()
-  const isEdit = !!initial
+  const router = useRouter();
+  const { addItem, updateItem } = useItemStore();
+  const isEdit = !!initial;
 
   const [values, setValues] = useState<FormValues>({
     name: initial?.name ?? '',
@@ -21,49 +36,67 @@ export function ItemForm({ initial }: ItemFormProps) {
     },
     tags: initial?.tags.join(', ') ?? '',
     category: initial?.category ?? '',
-  })
-  const [errors, setErrors] = useState<FormErrors>({})
+  });
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [submitError, setSubmitError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const set = (field: string, value: string) => {
     if (field === 'location.room' || field === 'location.spot') {
-      const key = field.split('.')[1] as 'room' | 'spot'
-      setValues((v) => ({ ...v, location: { ...v.location, [key]: value } }))
+      const key = field.split('.')[1] as 'room' | 'spot';
+      setValues((v) => ({ ...v, location: { ...v.location, [key]: value } }));
     } else {
-      setValues((v) => ({ ...v, [field]: value }))
+      setValues((v) => ({ ...v, [field]: value }));
     }
-    setErrors((e) => ({ ...e, [field]: undefined }))
-  }
+    setErrors((e) => ({ ...e, [field]: undefined }));
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const result = itemSchema.safeParse(values)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitError('');
+    const result = itemSchema.safeParse(values);
 
     if (!result.success) {
-      const flat = result.error.flatten()
+      const flat = result.error.flatten();
       setErrors({
         ...(flat.fieldErrors as FormErrors),
         'location.room': flat.fieldErrors.location?.[0],
         'location.spot': flat.fieldErrors.location?.[0],
-      })
-      return
+      });
+      return;
     }
 
     const data = {
       name: result.data.name,
       description: result.data.description,
       location: result.data.location,
-      tags: result.data.tags.split(',').map((t) => t.trim()).filter(Boolean),
+      tags: result.data.tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean),
       category: result.data.category,
-    }
+    };
+
+    setIsSubmitting(true);
 
     if (isEdit && initial) {
-      updateItem(initial.id, data)
-      router.push(`/items/${initial.id}`)
+      const updated = await updateItem(initial.id, data);
+      if (updated) {
+        router.push(`/items/${initial.id}`);
+      } else {
+        setSubmitError('No se pudo guardar. Intenta de nuevo.');
+      }
     } else {
-      addItem(data)
-      router.push('/items')
+      const created = await addItem(data);
+      if (created) {
+        router.push('/items');
+      } else {
+        setSubmitError('No se pudo crear el objeto. Intenta de nuevo.');
+      }
     }
-  }
+
+    setIsSubmitting(false);
+  };
 
   return (
     <Form onSubmit={handleSubmit} noValidate>
@@ -95,7 +128,9 @@ export function ItemForm({ initial }: ItemFormProps) {
             value={values.location.room}
             onChange={(room) => set('location.room', room)}
           />
-          {errors['location.room'] && <ErrorMsg>{errors['location.room']}</ErrorMsg>}
+          {errors['location.room'] && (
+            <ErrorMsg>{errors['location.room']}</ErrorMsg>
+          )}
         </Field>
 
         <Field>
@@ -106,7 +141,9 @@ export function ItemForm({ initial }: ItemFormProps) {
             onChange={(e) => set('location.spot', e.target.value)}
             placeholder="Cajón izquierdo, estante alto…"
           />
-          {errors['location.spot'] && <ErrorMsg>{errors['location.spot']}</ErrorMsg>}
+          {errors['location.spot'] && (
+            <ErrorMsg>{errors['location.spot']}</ErrorMsg>
+          )}
         </Field>
       </Row>
 
@@ -118,7 +155,9 @@ export function ItemForm({ initial }: ItemFormProps) {
           onChange={(e) => set('tags', e.target.value)}
           placeholder="tornillo, phillips, herramienta"
         />
-        <Hint>Separados por comas — te ayudan a encontrarlo con otras palabras</Hint>
+        <Hint>
+          Separados por comas — te ayudan a encontrarlo con otras palabras
+        </Hint>
       </Field>
 
       <Field>
@@ -131,9 +170,11 @@ export function ItemForm({ initial }: ItemFormProps) {
         />
       </Field>
 
-      <SubmitButton type="submit">
+      {submitError && <ErrorMsg>{submitError}</ErrorMsg>}
+
+      <SubmitButton type="submit" disabled={isSubmitting}>
         {isEdit ? 'Guardar cambios' : 'Añadir objeto'}
       </SubmitButton>
     </Form>
-  )
+  );
 }
