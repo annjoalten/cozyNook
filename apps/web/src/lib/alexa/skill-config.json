@@ -28,18 +28,44 @@
           "slots": [
             {
               "name": "consulta",
-              "type": "AMAZON.SearchQuery"
+              "type": "CONSULTA_LIBRE"
             }
           ],
           "samples": [
             "nook dime {consulta}",
-            "nook apunta {consulta}",
             "nook busca {consulta}",
+            "nook apunta {consulta}",
             "nook lista {consulta}"
           ]
         }
       ],
-      "types": []
+      "types": [
+        {
+          "name": "CONSULTA_LIBRE",
+          "values": [
+            { "name": { "value": "dónde están mis llaves" } },
+            { "name": { "value": "dónde está el dentífrico" } },
+            { "name": { "value": "dónde están los documentos" } },
+            { "name": { "value": "mi lista de compras" } },
+            { "name": { "value": "mis préstamos activos" } },
+            { "name": { "value": "qué tengo en la cocina" } },
+            { "name": { "value": "qué hay en el salón" } },
+            { "name": { "value": "qué hay en el dormitorio" } },
+            { "name": { "value": "qué hay en el baño" } },
+            { "name": { "value": "el resumen de casa" } },
+            { "name": { "value": "cómo está la casa" } },
+            { "name": { "value": "comprar leche" } },
+            { "name": { "value": "comprar pan" } },
+            { "name": { "value": "comprar jabón" } },
+            { "name": { "value": "mis préstamos" } },
+            { "name": { "value": "quién tiene el taladro" } },
+            { "name": { "value": "le presté el taladro a Carlos" } },
+            { "name": { "value": "Carlos devolvió el taladro" } },
+            { "name": { "value": "me queda poco café" } },
+            { "name": { "value": "abrí un paquete de arroz" } }
+          ]
+        }
+      ]
     }
   }
 }

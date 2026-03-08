@@ -3,22 +3,14 @@
  *
  * Configuración en Alexa Developer Console:
  *   - Endpoint type: HTTPS
- *   - Endpoint URL: https://<tu-dominio>/api/alexa
  *   - Certificate: "My development endpoint is a sub-domain of a domain that has a wildcard certificate"
- *
- * Intents necesarios en el Skill:
- *   - AsistenteIntent  →  slot: consulta (tipo: AMAZON.SearchQuery)
- *   - AMAZON.StopIntent, AMAZON.CancelIntent, AMAZON.HelpIntent  (built-in)
- *
- * Utterances de ejemplo para AsistenteIntent:
- *   - pregunta {consulta}
- *   - dime {consulta}
- *   - quiero saber {consulta}
+ *   - Slot type: CONSULTA_LIBRE (custom) — AMAZON.SearchQuery no está disponible en español
  *
  * Estrategia de resolución:
- *   1. Fallback (pattern matching sin IA) → no gasta tokens
- *   2. Claude (solo si el fallback no resuelve) → gasta tokens
- *   3. Si Claude falla, se cachea el error 10 min para no reintentar
+ *   1. Validación de timestamp (< 150 seg) para evitar replay attacks
+ *   2. Fallback (pattern matching sin IA) → no gasta tokens
+ *   3. Claude (solo si el fallback no resuelve) → gasta tokens
+ *   4. Si Claude falla por créditos, se cachea 10 min para no reintentar
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -27,14 +19,21 @@ import { handleWithClaude } from '../../../lib/alexa/claude';
 import { handleWithFallback } from '../../../lib/alexa/fallback';
 import type { AlexaRequest } from '../../../lib/alexa/types';
 
+const TIMESTAMP_TOLERANCE_MS = 150_000; // 150 segundos — requerimiento de Alexa
+
+function isTimestampValid(timestamp: string): boolean {
+  const requestTime = new Date(timestamp).getTime();
+  return Math.abs(Date.now() - requestTime) < TIMESTAMP_TOLERANCE_MS;
+}
+
 // Cache en memoria: si Claude falla por créditos, no reintentar durante 10 min
 let claudeUnavailableUntil: number | null = null;
-const CLAUDE_RETRY_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutos
+const CLAUDE_RETRY_COOLDOWN_MS = 10 * 60 * 1000;
 
 function isClaudeAvailable(): boolean {
   if (!claudeUnavailableUntil) return true;
   if (Date.now() > claudeUnavailableUntil) {
-    claudeUnavailableUntil = null; // cooldown expirado
+    claudeUnavailableUntil = null;
     return true;
   }
   return false;
@@ -47,7 +46,13 @@ function markClaudeUnavailable() {
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as AlexaRequest;
-    const { type } = body.request;
+    const { type, timestamp } = body.request;
+
+    // Validación de timestamp (requerimiento de seguridad de Alexa)
+    if (!isTimestampValid(timestamp)) {
+      console.warn('[Alexa webhook] Timestamp inválido:', timestamp);
+      return NextResponse.json(ERROR, { status: 400 });
+    }
 
     if (type === 'LaunchRequest') {
       return NextResponse.json(WELCOME);
@@ -79,22 +84,22 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(NO_QUERY);
       }
 
-      // 1️⃣ Intentar fallback primero — no gasta tokens
+      // 1️⃣ Fallback sin IA — no gasta tokens
       const fallback = await handleWithFallback(utterance).catch(() => ({ handled: false as const }));
       if (fallback.handled) {
         return NextResponse.json(buildResponse(fallback.response));
       }
 
-      // 2️⃣ Si Claude no está disponible (créditos agotados en cooldown), avisamos
+      // 2️⃣ Si Claude está en cooldown por créditos, avisamos
       if (!isClaudeAvailable()) {
         return NextResponse.json(
           buildResponse(
-            'Esta consulta necesita inteligencia artificial, pero la cuenta de Anthropic no tiene créditos disponibles. Recarga el saldo para poder ayudarte con esto.',
+            'Esta consulta necesita inteligencia artificial, pero la cuenta de Anthropic no tiene créditos disponibles. Recarga el saldo para poder ayudarte.',
           ),
         );
       }
 
-      // 3️⃣ Intentar con Claude
+      // 3️⃣ Claude
       try {
         const responseText = await handleWithClaude(utterance);
         return NextResponse.json(buildResponse(responseText));
@@ -109,7 +114,7 @@ export async function POST(request: NextRequest) {
           markClaudeUnavailable();
           return NextResponse.json(
             buildResponse(
-              'La cuenta de Anthropic se ha quedado sin créditos. Esta consulta necesita IA para procesarse. Por favor, recarga el saldo en la consola de Anthropic.',
+              'La cuenta de Anthropic se ha quedado sin créditos. Esta consulta necesita IA para procesarse. Por favor, recarga el saldo.',
             ),
           );
         }
