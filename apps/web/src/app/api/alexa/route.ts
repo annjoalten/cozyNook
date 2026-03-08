@@ -87,6 +87,18 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      // Intent dedicado para añadir a la lista — evita palabras reservadas de Amazon
+      if (intentName === 'AnadirCompraIntent') {
+        const item = body.request.intent?.slots?.item?.value?.trim() ?? '';
+        if (!item) return NextResponse.json(NO_QUERY);
+        const fallback = await handleWithFallback(`apunta ${item}`).catch(() => ({ handled: false as const }));
+        return NextResponse.json(
+          fallback.handled
+            ? buildResponse(fallback.response, { reprompt: '¿Algo más?' })
+            : ERROR,
+        );
+      }
+
       if (intentName === 'AMAZON.HelpIntent') {
         return NextResponse.json(
           buildResponse(

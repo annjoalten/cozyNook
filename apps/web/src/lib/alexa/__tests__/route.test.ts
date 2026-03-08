@@ -205,6 +205,54 @@ describe('intents directos (sin slot, sin Claude)', () => {
     expect(mockClaude).not.toHaveBeenCalled();
   });
 
+  it('AnadirCompraIntent → llama fallback("apunta <item>"), nunca Claude', async () => {
+    mockFallback.mockResolvedValueOnce({ handled: true, response: '"Jabón" añadido a la lista de compras.' });
+    const req = makeIntent('AnadirCompraIntent');
+    // Reconstruimos con slot "item" en lugar de "consulta"
+    const body = {
+      version: '1.0',
+      request: {
+        type: 'IntentRequest',
+        requestId: 'r1',
+        timestamp: freshTimestamp(),
+        locale: 'es-ES',
+        intent: {
+          name: 'AnadirCompraIntent',
+          confirmationStatus: 'NONE',
+          slots: { item: { name: 'item', value: 'jabón', confirmationStatus: 'NONE' } },
+        },
+      },
+    };
+    const response = await parseBody(await POST(new NextRequest('http://localhost/api/alexa', {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json' },
+    })));
+    expect(mockFallback).toHaveBeenCalledWith('apunta jabón');
+    expect(mockClaude).not.toHaveBeenCalled();
+    expect(response.response.outputSpeech.text).toContain('Jabón');
+  });
+
+  it('AnadirCompraIntent sin slot → NO_QUERY', async () => {
+    const body = {
+      version: '1.0',
+      request: {
+        type: 'IntentRequest',
+        requestId: 'r1',
+        timestamp: freshTimestamp(),
+        locale: 'es-ES',
+        intent: { name: 'AnadirCompraIntent', confirmationStatus: 'NONE', slots: {} },
+      },
+    };
+    const response = await parseBody(await POST(new NextRequest('http://localhost/api/alexa', {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json' },
+    })));
+    expect(response.response.outputSpeech.text).toContain('ayudarte');
+    expect(mockClaude).not.toHaveBeenCalled();
+  });
+
   it('ResumenIntent con fallback.handled=true → respuesta con reprompt', async () => {
     mockFallback.mockResolvedValueOnce({ handled: true, response: 'Todo en orden.' });
     const body = await parseBody(await POST(makeIntent('ResumenIntent')));

@@ -57,6 +57,23 @@
           ]
         },
         {
+          "name": "AnadirCompraIntent",
+          "slots": [
+            {
+              "name": "item",
+              "type": "CONSULTA_LIBRE"
+            }
+          ],
+          "samples": [
+            "nook apunta {item}",
+            "nook apunta {item} a la lista",
+            "nook pon {item} en la lista",
+            "nook guarda {item} en la lista",
+            "nook registra {item}",
+            "nook mete {item} en la lista"
+          ]
+        },
+        {
           "name": "AsistenteIntent",
           "slots": [
             {
@@ -67,7 +84,6 @@
           "samples": [
             "nook dime {consulta}",
             "nook busca {consulta}",
-            "nook apunta {consulta}",
             "nook lista {consulta}"
           ]
         }
