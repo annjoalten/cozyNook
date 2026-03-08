@@ -194,6 +194,82 @@ export async function handleWithFallback(utterance: string): Promise<FallbackRes
     return { handled: true, response: `No encontré "${nombre}" en la lista de compras pendiente.` };
   }
 
+  // ── Lista de compras — eliminar ───────────────────────────────────────────
+
+  const deleteMatch =
+    text.match(/^(?:borra|elimina|suprime|retira|saca)\s+(.+?)(?:\s+de la lista)?$/) ??
+    raw.match(/^(?:borra|elimina|suprime|retira|saca)\s+(.+?)(?:\s+de la lista)?$/);
+
+  if (deleteMatch) {
+    const nombre = stripArticle(deleteMatch[1].trim());
+
+    const { data: listData } = await supabase
+      .from('shopping_list')
+      .select('id, custom_name, item:items(name)')
+      .eq('checked', false)
+      .ilike('custom_name', `%${nombre}%`)
+      .limit(1);
+
+    if (listData && listData.length > 0) {
+      await supabase.from('shopping_list').delete().eq('id', listData[0].id);
+      return { handled: true, response: `"${listData[0].custom_name}" eliminado de la lista.` };
+    }
+
+    const { data: itemLinked } = await supabase
+      .from('shopping_list')
+      .select('id, item:items(name)')
+      .eq('checked', false)
+      .limit(20);
+
+    const deleteLinkedMatch = itemLinked?.find((e) =>
+      (e.item as unknown as { name: string } | null)?.name?.toLowerCase().includes(nombre),
+    );
+
+    if (deleteLinkedMatch) {
+      await supabase.from('shopping_list').delete().eq('id', deleteLinkedMatch.id);
+      const itemName = (deleteLinkedMatch.item as unknown as { name: string } | null)?.name ?? nombre;
+      return { handled: true, response: `"${itemName}" eliminado de la lista.` };
+    }
+
+    return { handled: true, response: `No encontré "${nombre}" en la lista de compras pendiente.` };
+  }
+
+  // ── Lista de compras — modificar cantidad ─────────────────────────────────
+  // CambiarCantidadIntent prepend "actualiza " al slot antes de llamar al fallback
+
+  const qtyNombreFirst =
+    text.match(/^(?:actualiza|cambia)\s+(.+?)\s+a\s+(\d+)(?:\s+unidades?)?$/);
+  const qtyCantidadFirst =
+    text.match(/^(?:actualiza|cambia)\s+(\d+)(?:\s+unidades?)?\s+de\s+(.+)$/);
+
+  if (qtyNombreFirst || qtyCantidadFirst) {
+    const [nombre, cantidad] = qtyNombreFirst
+      ? [stripArticle(qtyNombreFirst[1].trim()), parseInt(qtyNombreFirst[2])]
+      : [stripArticle((qtyCantidadFirst as RegExpMatchArray)[2].trim()), parseInt((qtyCantidadFirst as RegExpMatchArray)[1])];
+
+    if (isNaN(cantidad) || cantidad < 1) return { handled: false };
+
+    const { data: listData } = await supabase
+      .from('shopping_list')
+      .select('id, custom_name, item:items(name)')
+      .eq('checked', false)
+      .ilike('custom_name', `%${nombre}%`)
+      .limit(1);
+
+    if (listData && listData.length > 0) {
+      await supabase
+        .from('shopping_list')
+        .update({ quantity_needed: cantidad })
+        .eq('id', listData[0].id);
+      return {
+        handled: true,
+        response: `Cantidad de "${listData[0].custom_name}" actualizada a ${cantidad}.`,
+      };
+    }
+
+    return { handled: true, response: `No encontré "${nombre}" en la lista de compras.` };
+  }
+
   // ── Préstamos — ver ───────────────────────────────────────────────────────
 
   if (

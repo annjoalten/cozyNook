@@ -99,10 +99,35 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      // Intent dedicado para eliminar de la lista — borra la fila (distinto de "tacha" que marca)
+      if (intentName === 'EliminarCompraIntent') {
+        const item = body.request.intent?.slots?.item?.value?.trim() ?? '';
+        if (!item) return NextResponse.json(NO_QUERY);
+        const fallback = await handleWithFallback(`borra ${item}`).catch(() => ({ handled: false as const }));
+        return NextResponse.json(
+          fallback.handled
+            ? buildResponse(fallback.response, { reprompt: '¿Algo más?' })
+            : ERROR,
+        );
+      }
+
+      // Intent dedicado para modificar cantidad — "nook cambia leche a 3"
+      if (intentName === 'CambiarCantidadIntent') {
+        const consulta = body.request.intent?.slots?.consulta?.value?.trim() ?? '';
+        if (!consulta) return NextResponse.json(NO_QUERY);
+        // Prepend "actualiza " para que fallback pueda matchear sin ambigüedad
+        const fallback = await handleWithFallback(`actualiza ${consulta}`).catch(() => ({ handled: false as const }));
+        return NextResponse.json(
+          fallback.handled
+            ? buildResponse(fallback.response, { reprompt: '¿Algo más?' })
+            : buildResponse('No entendí. Di por ejemplo: nook cambia leche a 3.', { endSession: false }),
+        );
+      }
+
       if (intentName === 'AMAZON.HelpIntent') {
         return NextResponse.json(
           buildResponse(
-            'Los comandos rápidos son: nook lista, nook préstamos y nook resumen. Para buscar cosas di: nook dime dónde están tus llaves. Para apuntar: nook apunta comprar leche.',
+            'Comandos rápidos: nook lista, nook préstamos, nook resumen. Para añadir: nook apunta leche. Para borrar: nook borra leche. Para cambiar cantidad: nook cambia leche a 3. Para buscar: nook dime dónde están las llaves.',
             { endSession: false, reprompt: '¿En qué te ayudo?' },
           ),
         );

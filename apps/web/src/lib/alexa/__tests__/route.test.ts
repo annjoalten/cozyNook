@@ -348,7 +348,121 @@ describe('AsistenteIntent', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 7. EDGE CASES
+// 7. ELIMINAR COMPRA INTENT
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('EliminarCompraIntent', () => {
+  function makeEliminarIntent(itemValue?: string) {
+    const body = {
+      version: '1.0',
+      request: {
+        type: 'IntentRequest',
+        requestId: 'r1',
+        timestamp: freshTimestamp(),
+        locale: 'es-ES',
+        intent: {
+          name: 'EliminarCompraIntent',
+          confirmationStatus: 'NONE',
+          slots: itemValue !== undefined
+            ? { item: { name: 'item', value: itemValue, confirmationStatus: 'NONE' } }
+            : {},
+        },
+      },
+    };
+    return new NextRequest('http://localhost/api/alexa', {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  it('llama fallback("borra <item>"), nunca Claude', async () => {
+    mockFallback.mockResolvedValueOnce({ handled: true, response: '"Leche" eliminado de la lista.' });
+    await POST(makeEliminarIntent('leche'));
+    expect(mockFallback).toHaveBeenCalledWith('borra leche');
+    expect(mockClaude).not.toHaveBeenCalled();
+  });
+
+  it('fallback resuelve → respuesta con reprompt', async () => {
+    mockFallback.mockResolvedValueOnce({ handled: true, response: '"Pan" eliminado de la lista.' });
+    const body = await parseBody(await POST(makeEliminarIntent('pan')));
+    expect(body.response.outputSpeech.text).toContain('Pan');
+    expect(body.response.reprompt).toBeDefined();
+  });
+
+  it('slot vacío → NO_QUERY', async () => {
+    const body = await parseBody(await POST(makeEliminarIntent()));
+    expect(body.response.outputSpeech.text).toContain('ayudarte');
+    expect(mockClaude).not.toHaveBeenCalled();
+  });
+
+  it('fallback no resuelve → ERROR', async () => {
+    mockFallback.mockResolvedValueOnce({ handled: false });
+    const body = await parseBody(await POST(makeEliminarIntent('xyz')));
+    expect(body.response.outputSpeech.text).toContain('error');
+    expect(mockClaude).not.toHaveBeenCalled();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 8. CAMBIAR CANTIDAD INTENT
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('CambiarCantidadIntent', () => {
+  function makeCambiarIntent(consultaValue?: string) {
+    const body = {
+      version: '1.0',
+      request: {
+        type: 'IntentRequest',
+        requestId: 'r1',
+        timestamp: freshTimestamp(),
+        locale: 'es-ES',
+        intent: {
+          name: 'CambiarCantidadIntent',
+          confirmationStatus: 'NONE',
+          slots: consultaValue !== undefined
+            ? { consulta: { name: 'consulta', value: consultaValue, confirmationStatus: 'NONE' } }
+            : {},
+        },
+      },
+    };
+    return new NextRequest('http://localhost/api/alexa', {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  it('llama fallback("actualiza <consulta>"), nunca Claude', async () => {
+    mockFallback.mockResolvedValueOnce({ handled: true, response: 'Cantidad de "Leche" actualizada a 3.' });
+    await POST(makeCambiarIntent('leche a 3'));
+    expect(mockFallback).toHaveBeenCalledWith('actualiza leche a 3');
+    expect(mockClaude).not.toHaveBeenCalled();
+  });
+
+  it('fallback resuelve → respuesta con reprompt', async () => {
+    mockFallback.mockResolvedValueOnce({ handled: true, response: 'Cantidad de "Café" actualizada a 2.' });
+    const body = await parseBody(await POST(makeCambiarIntent('café a 2')));
+    expect(body.response.outputSpeech.text).toContain('Café');
+    expect(body.response.reprompt).toBeDefined();
+  });
+
+  it('slot vacío → NO_QUERY', async () => {
+    const body = await parseBody(await POST(makeCambiarIntent()));
+    expect(body.response.outputSpeech.text).toContain('ayudarte');
+    expect(mockClaude).not.toHaveBeenCalled();
+  });
+
+  it('fallback no resuelve → mensaje de ayuda con ejemplo (no ERROR genérico)', async () => {
+    mockFallback.mockResolvedValueOnce({ handled: false });
+    const body = await parseBody(await POST(makeCambiarIntent('algo raro')));
+    expect(body.response.outputSpeech.text).toContain('nook cambia');
+    expect(mockClaude).not.toHaveBeenCalled();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 9. EDGE CASES
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('edge cases', () => {

@@ -57,6 +57,38 @@
           ]
         },
         {
+          "name": "EliminarCompraIntent",
+          "slots": [
+            {
+              "name": "item",
+              "type": "CONSULTA_LIBRE"
+            }
+          ],
+          "samples": [
+            "nook borra {item}",
+            "nook borra {item} de la lista",
+            "nook elimina {item}",
+            "nook elimina {item} de la lista",
+            "nook retira {item} de la lista",
+            "nook saca {item} de la lista",
+            "nook suprime {item}"
+          ]
+        },
+        {
+          "name": "CambiarCantidadIntent",
+          "slots": [
+            {
+              "name": "consulta",
+              "type": "CONSULTA_LIBRE"
+            }
+          ],
+          "samples": [
+            "nook cambia {consulta}",
+            "nook actualiza {consulta}",
+            "nook modifica {consulta}"
+          ]
+        },
+        {
           "name": "AnadirCompraIntent",
           "slots": [
             {
@@ -144,7 +176,11 @@
             { "name": { "value": "necesito comprar azúcar" } },
             { "name": { "value": "falta papel de aluminio" } },
             { "name": { "value": "anota comprar vinagre" } },
-            { "name": { "value": "anota que falta champú" } }
+            { "name": { "value": "anota que falta champú" } },
+            { "name": { "value": "la leche a 2" } },
+            { "name": { "value": "el café a 3" } },
+            { "name": { "value": "el aceite a 1" } },
+            { "name": { "value": "leche a 2 unidades" } }
           ]
         }
       ]

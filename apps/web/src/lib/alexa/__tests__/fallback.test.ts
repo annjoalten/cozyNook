@@ -437,7 +437,140 @@ describe('lista de compras — marcar comprado', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 6. PRÉSTAMOS — VER
+// 6. LISTA DE COMPRAS — ELIMINAR
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('lista de compras — eliminar', () => {
+  it('"borra leche" → elimina por custom_name', async () => {
+    configureMock({
+      shopping_list: [
+        { data: [{ id: 5, custom_name: 'Leche', item: null }], error: null },
+        { data: null, error: null }, // DELETE
+      ],
+    });
+    const r = await handleWithFallback('borra leche');
+    expect(r.handled).toBe(true);
+    if (r.handled) {
+      expect(r.response).toContain('"Leche"');
+      expect(r.response).toContain('eliminado');
+    }
+  });
+
+  it('"elimina la leche de la lista" → stripArticle + eliminado', async () => {
+    configureMock({
+      shopping_list: [
+        { data: [{ id: 6, custom_name: 'Leche', item: null }], error: null },
+        { data: null, error: null },
+      ],
+    });
+    const r = await handleWithFallback('elimina la leche de la lista');
+    expect(r.handled).toBe(true);
+    if (r.handled) expect(r.response).toContain('eliminado');
+  });
+
+  it('encontrado por item vinculado cuando no hay custom_name', async () => {
+    configureMock({
+      shopping_list: [
+        { data: [], error: null },                                           // ilike: no custom_name match
+        { data: [{ id: 99, item: { name: 'Café' } }], error: null },        // linked item
+        { data: null, error: null },                                         // DELETE
+      ],
+    });
+    const r = await handleWithFallback('borra café');
+    expect(r.handled).toBe(true);
+    if (r.handled) expect(r.response).toContain('Café');
+  });
+
+  it('no encontrado → mensaje específico', async () => {
+    configureMock({
+      shopping_list: [
+        { data: [], error: null },
+        { data: [], error: null },
+      ],
+    });
+    const r = await handleWithFallback('borra naranja');
+    expect(r.handled).toBe(true);
+    if (r.handled) expect(r.response).toContain('No encontré');
+  });
+
+  it.each(['borra leche', 'elimina pan', 'suprime aceite', 'retira sal de la lista', 'saca café'])(
+    '"%s" activa eliminar', async (utterance) => {
+      configureMock({
+        shopping_list: [
+          { data: [{ id: 1, custom_name: utterance.split(' ').pop()!, item: null }], error: null },
+          { data: null, error: null },
+        ],
+      });
+      const r = await handleWithFallback(utterance);
+      expect(r.handled).toBe(true);
+    },
+  );
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 7. LISTA DE COMPRAS — MODIFICAR CANTIDAD
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('lista de compras — modificar cantidad', () => {
+  it('"actualiza leche a 3" → actualiza quantity_needed', async () => {
+    configureMock({
+      shopping_list: [
+        { data: [{ id: 10, custom_name: 'Leche', item: null }], error: null },
+        { data: null, error: null }, // UPDATE
+      ],
+    });
+    const r = await handleWithFallback('actualiza leche a 3');
+    expect(r.handled).toBe(true);
+    if (r.handled) {
+      expect(r.response).toContain('"Leche"');
+      expect(r.response).toContain('3');
+      expect(r.response).toContain('actualizada');
+    }
+  });
+
+  it('"actualiza la leche a 2 unidades" → stripArticle funciona', async () => {
+    configureMock({
+      shopping_list: [
+        { data: [{ id: 11, custom_name: 'Leche', item: null }], error: null },
+        { data: null, error: null },
+      ],
+    });
+    const r = await handleWithFallback('actualiza la leche a 2 unidades');
+    expect(r.handled).toBe(true);
+    if (r.handled) expect(r.response).toContain('2');
+  });
+
+  it('"actualiza 5 de café" → patrón cantidad-primero', async () => {
+    configureMock({
+      shopping_list: [
+        { data: [{ id: 12, custom_name: 'Café', item: null }], error: null },
+        { data: null, error: null },
+      ],
+    });
+    const r = await handleWithFallback('actualiza 5 de café');
+    expect(r.handled).toBe(true);
+    if (r.handled) {
+      expect(r.response).toContain('"Café"');
+      expect(r.response).toContain('5');
+    }
+  });
+
+  it('no encontrado en lista → mensaje específico', async () => {
+    configureMock({ shopping_list: { data: [], error: null } });
+    const r = await handleWithFallback('actualiza naranja a 4');
+    expect(r.handled).toBe(true);
+    if (r.handled) expect(r.response).toContain('No encontré');
+  });
+
+  it('cantidad = 0 → handled: false (cantidad inválida)', async () => {
+    configureMock({ shopping_list: { data: [], error: null } });
+    const r = await handleWithFallback('actualiza leche a 0');
+    expect(r.handled).toBe(false);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 10. PRÉSTAMOS — VER
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('préstamos — ver', () => {
@@ -507,7 +640,7 @@ describe('préstamos — ver', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 7. ITEMS EN HABITACIÓN
+// 11. ITEMS EN HABITACIÓN
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('items en habitación', () => {
@@ -554,7 +687,7 @@ describe('items en habitación', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 8. BÚSQUEDA DE ITEM POR NOMBRE
+// 12. BÚSQUEDA DE ITEM POR NOMBRE
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('búsqueda de item', () => {
@@ -624,7 +757,7 @@ describe('búsqueda de item', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 9. CASOS QUE DEBEN IR A CLAUDE (handled: false)
+// 13. CASOS QUE DEBEN IR A CLAUDE (handled: false)
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('casos fuera de cobertura → handled: false (→ Claude)', () => {

@@ -23,7 +23,9 @@
       "Bash(chmod +x /Users/annjolielourido/Projects/nook/cozyNook/.githooks/pre-commit)",
       "Bash(git config core.hooksPath .githooks)",
       "Bash(git config core.hooksPath)",
-      "Bash(.githooks/pre-commit)"
+      "Bash(.githooks/pre-commit)",
+      "Bash(npx vitest run apps/web/src/lib/alexa/__tests__/ --reporter=verbose)",
+      "Bash(npx tsc --noEmit)"
     ],
     "additionalDirectories": [
       "/Users/annjolielourido/Projects/nook/cozyNook/.claude/skills",
