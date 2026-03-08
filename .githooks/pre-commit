@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Pre-commit hook: tests de Alexa + typecheck
+# Instalado automáticamente via "pnpm prepare"
+
+set -e
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+echo "▶ Tests Alexa..."
+npx vitest run apps/web/src/lib/alexa/__tests__/ --reporter=verbose
+
+echo "▶ TypeScript check..."
+cd apps/web && npx tsc --noEmit
+
+echo "✓ Pre-commit OK"

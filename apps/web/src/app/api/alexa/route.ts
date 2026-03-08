@@ -26,10 +26,21 @@ function isTimestampValid(timestamp: string): boolean {
   return Math.abs(Date.now() - requestTime) < TIMESTAMP_TOLERANCE_MS;
 }
 
-function isCreditsError(message: string): boolean {
+/** Extrae texto del error aunque no sea instancia de Error (bundling ESM/CJS) */
+function errorToString(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'object' && error !== null) {
+    try { return JSON.stringify(error); } catch { /* noop */ }
+  }
+  return String(error);
+}
+
+function isCreditsError(error: unknown): boolean {
+  const text = errorToString(error);
   return (
-    message.includes('credit balance is too low') ||
-    message.includes('Your credit balance')
+    text.includes('credit balance is too low') ||
+    text.includes('Your credit balance') ||
+    text.includes('credit_balance')
   );
 }
 
@@ -103,9 +114,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(buildResponse(responseText, { reprompt: '¿Algo más?' }));
       } catch (error) {
         console.error('[Alexa webhook] Error de Claude:', error);
-        const message = error instanceof Error ? error.message : '';
 
-        if (isCreditsError(message)) {
+        if (isCreditsError(error)) {
           return NextResponse.json(
             buildResponse(
               'La cuenta de Anthropic se ha quedado sin créditos. Por favor, recarga el saldo en la consola de Anthropic.',

@@ -16,7 +16,14 @@
       "Bash(git add apps/web/src/lib/alexa/responses.ts apps/web/src/app/api/alexa/route.ts)",
       "Bash(git commit:*)",
       "Bash(npx vitest run apps/web/src/lib/alexa/__tests__/fallback.test.ts --reporter=verbose)",
-      "Bash(npx vitest run apps/web/src/lib/alexa/__tests__/fallback.test.ts apps/web/src/lib/alexa/__tests__/route.test.ts --reporter=verbose)"
+      "Bash(npx vitest run apps/web/src/lib/alexa/__tests__/fallback.test.ts apps/web/src/lib/alexa/__tests__/route.test.ts --reporter=verbose)",
+      "Bash(npx vitest run apps/web/src/lib/alexa/__tests__/route.test.ts --reporter=verbose)",
+      "Bash(pnpm --filter web build)",
+      "Bash(pnpm build)",
+      "Bash(chmod +x /Users/annjolielourido/Projects/nook/cozyNook/.githooks/pre-commit)",
+      "Bash(git config core.hooksPath .githooks)",
+      "Bash(git config core.hooksPath)",
+      "Bash(.githooks/pre-commit)"
     ],
     "additionalDirectories": [
       "/Users/annjolielourido/Projects/nook/cozyNook/.claude/skills",

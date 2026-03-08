@@ -263,7 +263,7 @@ async function executeTool(
       return JSON.stringify(
         data.map((entry) => ({
           id: entry.id,
-          nombre: entry.custom_name ?? (entry.item as { name: string } | null)?.name,
+          nombre: entry.custom_name ?? (entry.item as unknown as { name: string } | null)?.name,
           cantidad: entry.quantity_needed,
           nota: entry.note,
         })),
@@ -344,7 +344,7 @@ async function executeTool(
       return JSON.stringify(
         data.map((loan) => ({
           id: loan.id,
-          objeto: (loan.item as { name: string } | null)?.name,
+          objeto: (loan.item as unknown as { name: string } | null)?.name,
           prestado_a: loan.lent_to,
           fecha: loan.lent_at,
           nota: loan.note,
@@ -398,7 +398,7 @@ async function executeTool(
 
       // Busca el préstamo que coincida con el nombre del item
       const match = loans.find((l) =>
-        (l.item as { name: string } | null)?.name
+        (l.item as unknown as { name: string } | null)?.name
           ?.toLowerCase()
           .includes(item_nombre.toLowerCase()),
       );
@@ -413,7 +413,7 @@ async function executeTool(
         .eq('id', match.id);
 
       if (error) return `Error al registrar la devolución: ${error.message}`;
-      const itemName = (match.item as { name: string } | null)?.name ?? item_nombre;
+      const itemName = (match.item as unknown as { name: string } | null)?.name ?? item_nombre;
       return `"${itemName}" marcado como devuelto por ${match.lent_to}. `;
     }
 
@@ -496,7 +496,7 @@ async function executeTool(
         lista_compras_pendiente: pendientesCompra,
         prestamos_activos: prestamosActivos.length,
         detalle_prestamos: prestamosActivos.map((l) => ({
-          objeto: (l.item as { name: string } | null)?.name,
+          objeto: (l.item as unknown as { name: string } | null)?.name,
           persona: l.lent_to,
         })),
         items_stock_bajo: stockBajo.map((i) => ({

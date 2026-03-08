@@ -115,7 +115,7 @@ export async function handleWithFallback(utterance: string): Promise<FallbackRes
 
     const nombres = data
       .slice(0, 5)
-      .map((e) => e.custom_name ?? (e.item as { name: string } | null)?.name)
+      .map((e) => e.custom_name ?? (e.item as unknown as { name: string } | null)?.name)
       .filter(Boolean)
       .join(', ');
 
@@ -179,7 +179,7 @@ export async function handleWithFallback(utterance: string): Promise<FallbackRes
       .limit(20);
 
     const match = itemLinked?.find((e) =>
-      (e.item as { name: string } | null)?.name?.toLowerCase().includes(nombre),
+      (e.item as unknown as { name: string } | null)?.name?.toLowerCase().includes(nombre),
     );
 
     if (match) {
@@ -187,7 +187,7 @@ export async function handleWithFallback(utterance: string): Promise<FallbackRes
         .from('shopping_list')
         .update({ checked: true, checked_at: new Date().toISOString() })
         .eq('id', match.id);
-      const itemName = (match.item as { name: string } | null)?.name ?? nombre;
+      const itemName = (match.item as unknown as { name: string } | null)?.name ?? nombre;
       return { handled: true, response: `"${itemName}" marcado como comprado.` };
     }
 
@@ -218,7 +218,7 @@ export async function handleWithFallback(utterance: string): Promise<FallbackRes
 
     const lista = data
       .slice(0, 3)
-      .map((l) => `${(l.item as { name: string } | null)?.name ?? 'objeto'} a ${l.lent_to}`)
+      .map((l) => `${(l.item as unknown as { name: string } | null)?.name ?? 'objeto'} a ${l.lent_to}`)
       .join(', ');
 
     const total = data.length;
