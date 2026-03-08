@@ -4,6 +4,9 @@
       "Bash(git push)",
       "Bash(npx nx build core)",
       "WebFetch(domain:support.claude.com)"
+    ],
+    "additionalDirectories": [
+      "/Users/annjolielourido/Projects/nook/cozyNook/.claude/skills"
     ]
   }
 }
