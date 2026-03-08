@@ -14,7 +14,9 @@
       "Bash(git add apps/web/src/lib/alexa/skill-config.json apps/web/src/app/api/alexa/route.ts)",
       "Bash(git add apps/web/src/lib/alexa/fallback.ts apps/web/src/lib/alexa/skill-config.json apps/web/src/app/api/alexa/route.ts apps/web/src/lib/alexa/responses.ts)",
       "Bash(git add apps/web/src/lib/alexa/responses.ts apps/web/src/app/api/alexa/route.ts)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(npx vitest run apps/web/src/lib/alexa/__tests__/fallback.test.ts --reporter=verbose)",
+      "Bash(npx vitest run apps/web/src/lib/alexa/__tests__/fallback.test.ts apps/web/src/lib/alexa/__tests__/route.test.ts --reporter=verbose)"
     ],
     "additionalDirectories": [
       "/Users/annjolielourido/Projects/nook/cozyNook/.claude/skills",

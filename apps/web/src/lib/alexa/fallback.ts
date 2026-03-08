@@ -88,12 +88,15 @@ export async function handleWithFallback(utterance: string): Promise<FallbackRes
   if (
     text.includes('lista de compras') ||
     text.includes('lista compras') ||
+    raw.includes('lista de compras') ||  // raw: evita que normalize() strips "lista" carrier phrase
     text.includes('qué me falta') ||
     text.includes('que me falta') ||
     text.includes('qué hay que comprar') ||
     text.includes('que hay que comprar') ||
     text.includes('qué tengo que comprar') ||
     text.includes('que tengo que comprar') ||
+    text.includes('qué tengo en la lista') ||
+    text.includes('que tengo en la lista') ||
     text.includes('qué hay en la lista') ||
     text.includes('que hay en la lista') ||
     text.includes('mis compras') ||
@@ -127,7 +130,10 @@ export async function handleWithFallback(utterance: string): Promise<FallbackRes
   // ── Lista de compras — añadir ─────────────────────────────────────────────
 
   const addMatch =
+    // Primero en text (normalizado), por si no se strippeó el verbo
     text.match(/^(?:apunta|anota)\s+(?:comprar\s+)?(.+?)(?:\s+(?:a la lista|en la lista|a compras?))?$/) ??
+    // raw: evita que normalize() strips "apunta/anota" carrier phrase
+    raw.match(/^(?:apunta|anota)\s+(?:comprar\s+)?(.+?)(?:\s+(?:a la lista|en la lista|a compras?))?$/) ??
     text.match(/^(?:necesito|comprar|me falta|falta|quiero)\s+(.+)$/);
 
   if (addMatch) {
