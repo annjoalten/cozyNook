@@ -32,7 +32,6 @@
             }
           ],
           "samples": [
-            "{consulta}",
             "pregunta {consulta}",
             "dime {consulta}",
             "quiero saber {consulta}",
