@@ -2,6 +2,7 @@
 
 import { CaretDown, HandbagSimple, Plus, X } from '@phosphor-icons/react';
 import { useEffect, useRef, useState } from 'react';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { useItemStore } from '../../store/itemStore';
 import { useLoansStore } from '../../store/loansStore';
 import {
@@ -74,6 +75,8 @@ export default function PrestamosPage() {
   const [search, setSearch] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [confirmReturnId, setConfirmReturnId] = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -137,6 +140,7 @@ export default function PrestamosPage() {
   }
 
   const active = loans.filter((l) => !l.returned_at);
+  const past = loans.filter((l) => l.returned_at);
 
   return (
     <Page>
@@ -181,12 +185,52 @@ export default function PrestamosPage() {
                 {loan.note ? ` · ${loan.note}` : ''}
               </LoanMeta>
             </LoanInfo>
-            <ReturnBtn onClick={() => void returnLoan(loan.id)}>
+            <ReturnBtn onClick={() => setConfirmReturnId(loan.id)}>
               Devuelto
             </ReturnBtn>
           </LoanCard>
         ))
       )}
+
+      {past.length > 0 && (
+        <div>
+          <ReturnBtn
+            style={{ background: 'transparent', border: 'none', padding: '0', fontSize: '0.8rem', color: 'inherit', opacity: 0.5 }}
+            onClick={() => setShowHistory((v) => !v)}
+          >
+            {showHistory ? 'Ocultar historial' : `Ver historial (${past.length} devuelto${past.length !== 1 ? 's' : ''})`}
+          </ReturnBtn>
+          {showHistory && past.map((loan) => (
+            <LoanCard key={loan.id} style={{ opacity: 0.45, marginTop: '0.5rem' }}>
+              <LoanInfo>
+                <LentTo>{loan.lent_to}</LentTo>
+                {loan.item && (
+                  <ItemLink href={`/items/${loan.item.id}`}>
+                    {loan.item.name}
+                  </ItemLink>
+                )}
+                <LoanMeta>
+                  Prestado {formatRelativeDate(loan.lent_at)}
+                  {loan.note ? ` · ${loan.note}` : ''}
+                  {loan.returned_at ? ` · Devuelto ${formatRelativeDate(loan.returned_at)}` : ''}
+                </LoanMeta>
+              </LoanInfo>
+            </LoanCard>
+          ))}
+        </div>
+      )}
+
+      <ConfirmDialog
+        open={!!confirmReturnId}
+        title="¿Marcar como devuelto?"
+        description="Esto moverá el préstamo al historial."
+        confirmLabel="Sí, devuelto"
+        onConfirm={async () => {
+          if (confirmReturnId) await returnLoan(confirmReturnId);
+          setConfirmReturnId(null);
+        }}
+        onCancel={() => setConfirmReturnId(null)}
+      />
 
       {modalOpen && (
         <ModalOverlay onClick={resetModal}>

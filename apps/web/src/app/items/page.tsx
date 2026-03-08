@@ -55,6 +55,10 @@ export default function ItemsPage() {
   const [exportOpen, setExportOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
+  const categories = [...new Set(items.map((i) => i.category).filter(Boolean) as string[])]
+    .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
 
   const textFiltered = query.trim()
     ? items.filter((item) => {
@@ -69,14 +73,18 @@ export default function ItemsPage() {
       })
     : items;
 
+  const categoryFiltered = activeCategory
+    ? textFiltered.filter((item) => item.category === activeCategory)
+    : textFiltered;
+
   const filtered = (
     activeLetter
-      ? textFiltered.filter((item) => initialBucket(item.name) === activeLetter)
-      : textFiltered
+      ? categoryFiltered.filter((item) => initialBucket(item.name) === activeLetter)
+      : categoryFiltered
   ).sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
 
   const emptyQueryLabel =
-    query || (activeLetter ? `inicial ${activeLetter}` : '');
+    activeCategory || query || (activeLetter ? `inicial ${activeLetter}` : '');
 
   return (
     <Page>
@@ -125,6 +133,26 @@ export default function ItemsPage() {
           onClear={() => setQuery('')}
           placeholder="Busca por nombre, etiqueta o ubicación..."
         />
+
+        {categories.length > 0 && (
+          <LettersWrap>
+            <LetterButton
+              $active={activeCategory === null}
+              onClick={() => setActiveCategory(null)}
+            >
+              Todas
+            </LetterButton>
+            {categories.map((cat) => (
+              <LetterButton
+                key={cat}
+                $active={activeCategory === cat}
+                onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
+              >
+                {cat}
+              </LetterButton>
+            ))}
+          </LettersWrap>
+        )}
 
         <LettersWrap>
           <LetterButton

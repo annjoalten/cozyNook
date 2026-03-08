@@ -149,6 +149,61 @@ export const SectionTitle = styled.h3`
   margin-bottom: 0.5rem;
 `;
 
+export const StockControls = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+`;
+
+export const StockQtyBtn = styled.button`
+  width: 2rem;
+  height: 2rem;
+  border-radius: ${({ theme }) => theme.radii.md};
+  border: 1.5px solid ${({ theme }) => theme.colors.cream};
+  background: ${({ theme }) => theme.colors.white};
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: 1rem;
+  color: ${({ theme }) => theme.colors.bark};
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  &:hover:not(:disabled) {
+    border-color: ${({ theme }) => theme.colors.bark};
+    background: ${({ theme }) => theme.colors.parchment};
+  }
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+`;
+
+export const StockQtyDisplay = styled.span`
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.base};
+  font-weight: ${({ theme }) => theme.fontWeight.medium};
+  color: ${({ theme }) => theme.colors.bark};
+  min-width: 2rem;
+  text-align: center;
+`;
+
+export const StockSaveBtn = styled.button`
+  padding: 0.35rem 0.85rem;
+  border-radius: ${({ theme }) => theme.radii.md};
+  border: none;
+  background: ${({ theme }) => theme.colors.bark};
+  color: ${({ theme }) => theme.colors.parchment};
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  font-weight: ${({ theme }) => theme.fontWeight.medium};
+  cursor: pointer;
+  transition: opacity 0.15s;
+  &:hover:not(:disabled) { opacity: 0.85; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+`;
+
 /* ── Stock alert ── */
 
 export const AlertSection = styled.div`

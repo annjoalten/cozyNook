@@ -54,7 +54,11 @@ import {
   ReturnBtn,
   SectionTitle,
   StockBlock,
+  StockControls,
   StockLabel,
+  StockQtyBtn,
+  StockQtyDisplay,
+  StockSaveBtn,
   StockValue,
   Tags,
 } from './page.styles';
@@ -102,6 +106,11 @@ export default function ItemDetailPage() {
   const [threshold, setThreshold] = useState(1);
   const [alertSaving, setAlertSaving] = useState(false);
 
+  // Quick stock edit
+  const updateItem = useItemStore((s) => s.updateItem);
+  const [quickQty, setQuickQty] = useState<number | null>(null);
+  const [savingStock, setSavingStock] = useState(false);
+
   // Loans
   const [loans, setLoans] = useState<Loan[]>([]);
   const [showLoanForm, setShowLoanForm] = useState(false);
@@ -111,6 +120,20 @@ export default function ItemDetailPage() {
   const [returningId, setReturningId] = useState<string | null>(null);
 
   const item = getItemById(id);
+
+  // Sync quickQty when item loads
+  useEffect(() => {
+    if (item?.stock && quickQty === null) {
+      setQuickQty(item.stock.quantity);
+    }
+  }, [item, quickQty]);
+
+  const handleSaveStock = async () => {
+    if (!item?.stock || quickQty === null) return;
+    setSavingStock(true);
+    await updateItem(id, { stock: { ...item.stock, quantity: quickQty } });
+    setSavingStock(false);
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -279,6 +302,26 @@ export default function ItemDetailPage() {
                   {l}
                 </StockValue>
               ))}
+              <StockControls>
+                <StockQtyBtn
+                  onClick={() => setQuickQty((q) => Math.max(0, (q ?? item.stock!.quantity) - 1))}
+                  disabled={savingStock || (quickQty ?? item.stock.quantity) <= 0}
+                >
+                  −
+                </StockQtyBtn>
+                <StockQtyDisplay>{quickQty ?? item.stock.quantity}</StockQtyDisplay>
+                <StockQtyBtn
+                  onClick={() => setQuickQty((q) => (q ?? item.stock!.quantity) + 1)}
+                  disabled={savingStock}
+                >
+                  +
+                </StockQtyBtn>
+                {quickQty !== null && quickQty !== item.stock.quantity && (
+                  <StockSaveBtn onClick={handleSaveStock} disabled={savingStock}>
+                    {savingStock ? '…' : 'Guardar'}
+                  </StockSaveBtn>
+                )}
+              </StockControls>
             </StockBlock>
           )}
 

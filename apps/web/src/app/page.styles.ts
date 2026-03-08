@@ -88,3 +88,57 @@ export const EmptyHint = styled.p`
   font-family: ${({ theme }) => theme.fontFamily.body};
   color: ${({ theme }) => theme.colors.taupe};
 `;
+
+export const AlertBanner = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: ${({ theme }) => theme.colors.parchment};
+  border: 1.5px solid ${({ theme }) => theme.colors.sand};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.colors.bark};
+`;
+
+export const LoanRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.cream};
+  &:last-child { border-bottom: none; }
+`;
+
+export const LoanRowInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+`;
+
+export const LoanRowName = styled.span`
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  font-weight: ${({ theme }) => theme.fontWeight.medium};
+  color: ${({ theme }) => theme.colors.bark};
+`;
+
+export const LoanRowMeta = styled.span`
+  font-family: ${({ theme }) => theme.fontFamily.body};
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  color: ${({ theme }) => theme.colors.taupe};
+`;
+
+export const SectionCard = styled.div`
+  background: ${({ theme }) => theme.colors.white};
+  border: 1.5px solid ${({ theme }) => theme.colors.cream};
+  border-radius: ${({ theme }) => theme.radii.xl};
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
