@@ -45,6 +45,7 @@
     "typescript": "~5.7.2"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.54.0",
     "@phosphor-icons/react": "^2.1.10",
     "@supabase/supabase-js": "^2.98.0",
     "framer-motion": "^12.35.0",

@@ -3,10 +3,13 @@
     "allow": [
       "Bash(git push)",
       "Bash(npx nx build core)",
-      "WebFetch(domain:support.claude.com)"
+      "WebFetch(domain:support.claude.com)",
+      "Bash(pnpm install --silent)",
+      "Bash(node -e \"console.log\\(require\\(''/Users/annjolielourido/Projects/nook/cozyNook/node_modules/next/package.json''\\).version\\)\")"
     ],
     "additionalDirectories": [
-      "/Users/annjolielourido/Projects/nook/cozyNook/.claude/skills"
+      "/Users/annjolielourido/Projects/nook/cozyNook/.claude/skills",
+      "/Users/annjolielourido/Projects/nook/cozyNook/apps/web/src/lib"
     ]
   }
 }

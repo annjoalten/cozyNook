@@ -1,0 +1,55 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "cozy nook",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "AsistenteIntent",
+          "slots": [
+            {
+              "name": "consulta",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "{consulta}",
+            "pregunta {consulta}",
+            "dime {consulta}",
+            "quiero saber {consulta}",
+            "busca {consulta}",
+            "encuentra {consulta}",
+            "añade {consulta} a la lista",
+            "agrega {consulta} a la lista de compras",
+            "dónde están {consulta}",
+            "tengo {consulta}",
+            "quién tiene {consulta}",
+            "mis préstamos",
+            "mi lista de compras",
+            "qué tengo en {consulta}"
+          ]
+        }
+      ],
+      "types": []
+    }
+  }
+}
