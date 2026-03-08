@@ -59,10 +59,25 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(GOODBYE);
       }
 
+      // Intents directos sin slot — siempre resueltos por fallback, sin tocar Claude
+      if (intentName === 'ResumenIntent' ||
+          intentName === 'ListaComprasIntent' ||
+          intentName === 'PrestamosIntent') {
+        const queryMap: Record<string, string> = {
+          ResumenIntent: 'resumen',
+          ListaComprasIntent: 'lista de compras',
+          PrestamosIntent: 'préstamos',
+        };
+        const fallback = await handleWithFallback(queryMap[intentName]).catch(() => ({ handled: false as const }));
+        return NextResponse.json(
+          fallback.handled ? buildResponse(fallback.response) : ERROR,
+        );
+      }
+
       if (intentName === 'AMAZON.HelpIntent') {
         return NextResponse.json(
           buildResponse(
-            'Di "nook dime" seguido de tu consulta. Por ejemplo: nook dime dónde están mis llaves, nook lista mis compras, nook dime mis préstamos, o nook dime el resumen de casa.',
+            'Los comandos rápidos son: nook lista, nook préstamos y nook resumen. Para buscar cosas di: nook dime dónde están tus llaves. Para apuntar: nook apunta comprar leche.',
             { endSession: false, reprompt: '¿En qué te ayudo?' },
           ),
         );

@@ -24,6 +24,39 @@
           "samples": []
         },
         {
+          "name": "ResumenIntent",
+          "slots": [],
+          "samples": [
+            "nook resumen",
+            "nook el resumen",
+            "nook resumen de casa",
+            "nook cómo está la casa",
+            "nook estado de casa",
+            "nook novedades"
+          ]
+        },
+        {
+          "name": "ListaComprasIntent",
+          "slots": [],
+          "samples": [
+            "nook lista",
+            "nook mis compras",
+            "nook la lista de compras",
+            "nook qué me falta",
+            "nook qué hay en la lista"
+          ]
+        },
+        {
+          "name": "PrestamosIntent",
+          "slots": [],
+          "samples": [
+            "nook préstamos",
+            "nook mis préstamos",
+            "nook qué he prestado",
+            "nook préstamos activos"
+          ]
+        },
+        {
           "name": "AsistenteIntent",
           "slots": [
             {
@@ -44,25 +77,58 @@
           "name": "CONSULTA_LIBRE",
           "values": [
             { "name": { "value": "dónde están mis llaves" } },
+            { "name": { "value": "dónde están las llaves" } },
             { "name": { "value": "dónde está el dentífrico" } },
+            { "name": { "value": "dónde está el cargador" } },
             { "name": { "value": "dónde están los documentos" } },
-            { "name": { "value": "mi lista de compras" } },
-            { "name": { "value": "mis préstamos activos" } },
+            { "name": { "value": "dónde están los auriculares" } },
+            { "name": { "value": "dónde está el pasaporte" } },
+            { "name": { "value": "dónde está el taladro" } },
+            { "name": { "value": "dónde están las tijeras" } },
+            { "name": { "value": "dónde está la aspiradora" } },
             { "name": { "value": "qué tengo en la cocina" } },
             { "name": { "value": "qué hay en el salón" } },
             { "name": { "value": "qué hay en el dormitorio" } },
             { "name": { "value": "qué hay en el baño" } },
-            { "name": { "value": "el resumen de casa" } },
-            { "name": { "value": "cómo está la casa" } },
+            { "name": { "value": "qué hay en el trastero" } },
+            { "name": { "value": "qué hay en la entrada" } },
+            { "name": { "value": "qué hay en el estudio" } },
             { "name": { "value": "comprar leche" } },
             { "name": { "value": "comprar pan" } },
             { "name": { "value": "comprar jabón" } },
-            { "name": { "value": "mis préstamos" } },
+            { "name": { "value": "comprar café" } },
+            { "name": { "value": "comprar papel de baño" } },
+            { "name": { "value": "comprar aceite" } },
+            { "name": { "value": "comprar detergente" } },
+            { "name": { "value": "comprar fruta" } },
             { "name": { "value": "quién tiene el taladro" } },
+            { "name": { "value": "quién tiene mi paraguas" } },
             { "name": { "value": "le presté el taladro a Carlos" } },
+            { "name": { "value": "le presté el libro a María" } },
             { "name": { "value": "Carlos devolvió el taladro" } },
+            { "name": { "value": "María devolvió el libro" } },
             { "name": { "value": "me queda poco café" } },
-            { "name": { "value": "abrí un paquete de arroz" } }
+            { "name": { "value": "me queda poca leche" } },
+            { "name": { "value": "abrí un paquete de arroz" } },
+            { "name": { "value": "usé la última botella" } },
+            { "name": { "value": "ya compré la leche" } },
+            { "name": { "value": "ya compré el pan" } },
+            { "name": { "value": "ya compré el café" } },
+            { "name": { "value": "tacha la leche de la lista" } },
+            { "name": { "value": "tacha el pan de la lista" } },
+            { "name": { "value": "mis préstamos activos" } },
+            { "name": { "value": "qué he prestado" } },
+            { "name": { "value": "el resumen de casa" } },
+            { "name": { "value": "cómo está la casa" } },
+            { "name": { "value": "tengo tijeras en casa" } },
+            { "name": { "value": "tengo destornillador" } },
+            { "name": { "value": "busca el adaptador" } },
+            { "name": { "value": "busca las pilas" } },
+            { "name": { "value": "necesito comprar sal" } },
+            { "name": { "value": "necesito comprar azúcar" } },
+            { "name": { "value": "falta papel de aluminio" } },
+            { "name": { "value": "anota comprar vinagre" } },
+            { "name": { "value": "anota que falta champú" } }
           ]
         }
       ]
