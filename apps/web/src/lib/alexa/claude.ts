@@ -1,7 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { getSupabaseAdmin } from '../supabase/admin';
 
-const client = new Anthropic();
+let _client: Anthropic | null = null;
+function getClient(): Anthropic {
+  if (!_client) _client = new Anthropic();
+  return _client;
+}
 
 // ─── Tools que Claude puede invocar ─────────────────────────────────────────
 
@@ -269,7 +273,7 @@ export async function handleWithClaude(utterance: string): Promise<string> {
   ];
 
   for (let i = 0; i < 5; i++) {
-    const response = await client.messages.create({
+    const response = await getClient().messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 512,
       system: SYSTEM_PROMPT,
