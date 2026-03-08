@@ -11,7 +11,10 @@
       "Bash(git add apps/web/src/app/api/alexa/route.ts)",
       "Bash(git add apps/web/src/lib/alexa/skill-config.json apps/web/src/lib/alexa/responses.ts apps/web/src/app/api/alexa/route.ts)",
       "WebSearch",
-      "Bash(git add apps/web/src/lib/alexa/skill-config.json apps/web/src/app/api/alexa/route.ts)"
+      "Bash(git add apps/web/src/lib/alexa/skill-config.json apps/web/src/app/api/alexa/route.ts)",
+      "Bash(git add apps/web/src/lib/alexa/fallback.ts apps/web/src/lib/alexa/skill-config.json apps/web/src/app/api/alexa/route.ts apps/web/src/lib/alexa/responses.ts)",
+      "Bash(git add apps/web/src/lib/alexa/responses.ts apps/web/src/app/api/alexa/route.ts)",
+      "Bash(git commit:*)"
     ],
     "additionalDirectories": [
       "/Users/annjolielourido/Projects/nook/cozyNook/.claude/skills",
