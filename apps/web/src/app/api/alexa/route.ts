@@ -20,6 +20,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { buildResponse, WELCOME, ERROR, GOODBYE, NO_QUERY } from '../../../lib/alexa/responses';
 import { handleWithClaude } from '../../../lib/alexa/claude';
+import { handleWithFallback } from '../../../lib/alexa/fallback';
 import type { AlexaRequest } from '../../../lib/alexa/types';
 
 export async function POST(request: NextRequest) {
@@ -67,9 +68,24 @@ export async function POST(request: NextRequest) {
       } catch (error) {
         console.error('[Alexa webhook] Error:', error);
         const message = error instanceof Error ? error.message : '';
-        if (message.includes('credit balance is too low') || message.includes('Your credit balance')) {
+        const isCreditsError =
+          message.includes('credit balance is too low') ||
+          message.includes('Your credit balance');
+
+        // Intentar fallback sin IA antes de rendirse
+        const fallback = await handleWithFallback(utterance).catch(() => ({ handled: false as const }));
+        if (fallback.handled) {
+          const suffix = isCreditsError
+            ? ' Nota: la IA no está disponible ahora mismo, puede que esta respuesta necesite refinarse.'
+            : '';
+          return NextResponse.json(buildResponse(fallback.response + suffix));
+        }
+
+        if (isCreditsError) {
           return NextResponse.json(
-            buildResponse('No puedo responder ahora mismo porque la cuenta de Anthropic se ha quedado sin créditos. Por favor, recarga el saldo en la consola de Anthropic.')
+            buildResponse(
+              'La cuenta de Anthropic se ha quedado sin créditos y tu consulta necesita inteligencia artificial para procesarse. Por favor, recarga el saldo.',
+            ),
           );
         }
         return NextResponse.json(ERROR);
