@@ -19,10 +19,10 @@ export function buildResponse(
 }
 
 export const WELCOME = buildResponse(
-  'Hola! Soy cozyNook. Puedo ayudarte a encontrar cosas en casa, gestionar tu lista de compras o ver tus préstamos. ¿En qué te ayudo?',
+  'Hola! Soy nook. Di "dime" seguido de tu pregunta. Por ejemplo: dime dónde están mis llaves, o dime mi lista de compras.',
   {
     endSession: false,
-    reprompt: '¿En qué puedo ayudarte? Prueba decir: ¿dónde están mis llaves?',
+    reprompt: 'Di "dime" seguido de tu consulta. Por ejemplo: dime mis préstamos.',
   },
 );
 

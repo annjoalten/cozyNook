@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       if (intentName === 'AMAZON.HelpIntent') {
         return NextResponse.json(
           buildResponse(
-            'Puedes preguntarme cosas como: ¿dónde están mis llaves?, añade leche a la lista de compras, o ¿quién tiene mi taladro?',
+            'Di "dime" seguido de tu consulta. Por ejemplo: dime dónde están mis llaves, dime mi lista de compras, dime mis préstamos, o dime el resumen de casa.',
             { endSession: false, reprompt: '¿En qué te ayudo?' },
           ),
         );
