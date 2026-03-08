@@ -24,6 +24,9 @@ import {
   DropdownTrigger,
   DropdownWrapper,
   EmptyMsg,
+  EmptyPromptImage,
+  EmptyPromptTitle,
+  EmptyPromptWrap,
   EntryCard,
   EntryInfo,
   EntryList,
@@ -251,9 +254,12 @@ export default function CompraPage() {
       {isLoading ? (
         <EmptyMsg>Cargando…</EmptyMsg>
       ) : entries.length === 0 ? (
-        <EmptyMsg>
-          La lista está vacía. ¡Añade lo que necesites comprar!
-        </EmptyMsg>
+        <EmptyPromptWrap>
+          <EmptyPromptTitle>
+            Tu lista de la compra está vacía
+          </EmptyPromptTitle>
+          <EmptyPromptImage src="/rooms/lista-compra.png" alt="" />
+        </EmptyPromptWrap>
       ) : (
         <>
           {pending.length > 0 && (

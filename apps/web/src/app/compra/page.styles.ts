@@ -337,6 +337,27 @@ export const EmptyMsg = styled.p`
   padding: 2rem 0;
 `;
 
+export const EmptyPromptWrap = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0.5rem 0 1rem;
+  margin-top: 2rem;
+`;
+
+export const EmptyPromptTitle = styled.p`
+  font-family: ${({ theme }) => theme.fontFamily.heading};
+  font-size: ${({ theme }) => theme.fontSize['2xl']};
+  color: ${({ theme }) => theme.colors.bark};
+  line-height: ${({ theme }) => theme.lineHeight.snug};
+`;
+
+export const EmptyPromptImage = styled.img`
+  width: 600px;
+  margin-top: -4rem;
+  max-width: 100%;
+`;
+
 export const ClearCheckedButton = styled.button`
   align-self: flex-end;
   font-family: ${({ theme }) => theme.fontFamily.body};

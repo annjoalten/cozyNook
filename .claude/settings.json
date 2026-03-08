@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(git push)",
-      "Bash(npx nx build core)"
+      "Bash(npx nx build core)",
+      "WebFetch(domain:support.claude.com)"
     ]
   }
 }
