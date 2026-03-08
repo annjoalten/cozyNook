@@ -61,8 +61,19 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(NO_QUERY);
       }
 
-      const responseText = await handleWithClaude(utterance);
-      return NextResponse.json(buildResponse(responseText));
+      try {
+        const responseText = await handleWithClaude(utterance);
+        return NextResponse.json(buildResponse(responseText));
+      } catch (error) {
+        console.error('[Alexa webhook] Error:', error);
+        const message = error instanceof Error ? error.message : '';
+        if (message.includes('credit balance is too low') || message.includes('Your credit balance')) {
+          return NextResponse.json(
+            buildResponse('No puedo responder ahora mismo porque la cuenta de Anthropic se ha quedado sin créditos. Por favor, recarga el saldo en la consola de Anthropic.')
+          );
+        }
+        return NextResponse.json(ERROR);
+      }
     }
 
     return NextResponse.json(ERROR);
