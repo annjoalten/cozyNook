@@ -70,7 +70,9 @@ export async function POST(request: NextRequest) {
         };
         const fallback = await handleWithFallback(queryMap[intentName]).catch(() => ({ handled: false as const }));
         return NextResponse.json(
-          fallback.handled ? buildResponse(fallback.response) : ERROR,
+          fallback.handled
+            ? buildResponse(fallback.response, { reprompt: '¿Algo más?' })
+            : ERROR,
         );
       }
 
@@ -92,13 +94,13 @@ export async function POST(request: NextRequest) {
       // 1️⃣ Fallback sin IA — no gasta tokens
       const fallback = await handleWithFallback(utterance).catch(() => ({ handled: false as const }));
       if (fallback.handled) {
-        return NextResponse.json(buildResponse(fallback.response));
+        return NextResponse.json(buildResponse(fallback.response, { reprompt: '¿Algo más?' }));
       }
 
       // 2️⃣ Claude
       try {
         const responseText = await handleWithClaude(utterance);
-        return NextResponse.json(buildResponse(responseText));
+        return NextResponse.json(buildResponse(responseText, { reprompt: '¿Algo más?' }));
       } catch (error) {
         console.error('[Alexa webhook] Error de Claude:', error);
         const message = error instanceof Error ? error.message : '';

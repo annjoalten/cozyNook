@@ -8,7 +8,7 @@ export function buildResponse(
     version: '1.0',
     response: {
       outputSpeech: { type: 'PlainText', text },
-      shouldEndSession: options.endSession ?? true,
+      shouldEndSession: options.endSession ?? false,
       ...(options.reprompt && {
         reprompt: {
           outputSpeech: { type: 'PlainText', text: options.reprompt },
@@ -30,7 +30,7 @@ export const ERROR = buildResponse(
   'Lo siento, ha ocurrido un error. Por favor, inténtalo de nuevo.',
 );
 
-export const GOODBYE = buildResponse('¡Hasta luego!');
+export const GOODBYE = buildResponse('¡Hasta luego!', { endSession: true });
 
 export const NO_QUERY = buildResponse(
   '¿En qué puedo ayudarte? Puedes preguntarme dónde están tus cosas, qué tienes en la lista de compras, o decirme que añada algo.',
