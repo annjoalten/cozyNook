@@ -5,7 +5,10 @@
       "Bash(npx nx build core)",
       "WebFetch(domain:support.claude.com)",
       "Bash(pnpm install --silent)",
-      "Bash(node -e \"console.log\\(require\\(''/Users/annjolielourido/Projects/nook/cozyNook/node_modules/next/package.json''\\).version\\)\")"
+      "Bash(node -e \"console.log\\(require\\(''/Users/annjolielourido/Projects/nook/cozyNook/node_modules/next/package.json''\\).version\\)\")",
+      "Bash(git add apps/web/src/lib/alexa/claude.ts apps/web/src/app/api/alexa/route.ts)",
+      "Bash(git add apps/web/src/lib/alexa/fallback.ts apps/web/src/app/api/alexa/route.ts)",
+      "Bash(git add apps/web/src/app/api/alexa/route.ts)"
     ],
     "additionalDirectories": [
       "/Users/annjolielourido/Projects/nook/cozyNook/.claude/skills",

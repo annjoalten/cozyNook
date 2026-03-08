@@ -1,0 +1,108 @@
+{
+  "status": "SUCCESSFUL",
+  "result": {
+    "skillExecutionInfo": {
+      "invocationRequest": {
+        "endpoint": "https://cozy-nook-ka9o.vercel.app/api/alexa",
+        "body": {
+          "version": "1.0",
+          "session": {
+            "new": true,
+            "sessionId": "amzn1.echo-api.session.ab94f797-2f87-4f60-9cc4-c9b18304f35e",
+            "application": {
+              "applicationId": "amzn1.ask.skill.d87453c1-9390-450e-a3e6-0d3f1b8523dc"
+            },
+            "attributes": {},
+            "user": {
+              "userId": "amzn1.ask.account.AMASCUEN4QCUZVTE3BT4R4U2AIZFHZFT4XDM33JKZRESR2FTESWQ5QCQJCBCRKVEJC6NKFGUCUJD4RBZIFFMJ2SB3564MVGWUCEP6E6LEJDNTRKBYRGDHMUTQG4FCPV7CINIYIJOQE4EA2HU7CJY6ZNBWKZMTUZZWEQKTEYFZICGBWLTMVZDRFOLYEGSX23QILLU6HE5LYRTRZDVYO7R7FP2YAOHS6Q5SXYAUHE5HQ"
+            },
+            "affiliatedResources": []
+          },
+          "context": {
+            "Viewports": [
+              {
+                "type": "APL",
+                "id": "medHub",
+                "shape": "RECTANGLE",
+                "dpi": 160,
+                "presentationType": "OVERLAY",
+                "canRotate": false,
+                "configuration": {
+                  "current": {
+                    "mode": "HUB",
+                    "video": {
+                      "codecs": ["H_264_42", "H_264_41"]
+                    },
+                    "size": {
+                      "type": "DISCRETE",
+                      "pixelWidth": 1280,
+                      "pixelHeight": 800
+                    }
+                  }
+                }
+              }
+            ],
+            "Viewport": {
+              "experiences": [
+                {
+                  "arcMinuteWidth": 221,
+                  "arcMinuteHeight": 162,
+                  "canRotate": false,
+                  "canResize": false
+                }
+              ],
+              "mode": "HUB",
+              "shape": "RECTANGLE",
+              "pixelWidth": 1280,
+              "pixelHeight": 800,
+              "dpi": 160,
+              "currentPixelWidth": 1280,
+              "currentPixelHeight": 800,
+              "touch": ["SINGLE"],
+              "keyboard": ["DIRECTION"],
+              "video": {
+                "codecs": ["H_264_42", "H_264_41"]
+              }
+            },
+            "Extensions": {
+              "available": {
+                "aplext:backstack:10": {}
+              }
+            },
+            "Advertising": {
+              "advertisingId": "00000000-0000-0000-0000-000000000000",
+              "limitAdTracking": true
+            },
+            "System": {
+              "application": {
+                "applicationId": "amzn1.ask.skill.d87453c1-9390-450e-a3e6-0d3f1b8523dc"
+              },
+              "user": {
+                "userId": "amzn1.ask.account.AMASCUEN4QCUZVTE3BT4R4U2AIZFHZFT4XDM33JKZRESR2FTESWQ5QCQJCBCRKVEJC6NKFGUCUJD4RBZIFFMJ2SB3564MVGWUCEP6E6LEJDNTRKBYRGDHMUTQG4FCPV7CINIYIJOQE4EA2HU7CJY6ZNBWKZMTUZZWEQKTEYFZICGBWLTMVZDRFOLYEGSX23QILLU6HE5LYRTRZDVYO7R7FP2YAOHS6Q5SXYAUHE5HQ"
+              },
+              "device": {
+                "deviceId": "amzn1.ask.device.AMA6SFHWGPKYCKTWDDHQ5HFEGSGEA7FJ2I7SVI7Q6HZ52OQ5UUJPEX7VWHE5PZP4IAM7JRASMUCIXCUFGNV27ADHBUDUXZSKDJ5ZLG7GIKC2LIQQTO3MZAONXLQZYRTPFCNASNIFMHPOKXJ5F2A4ZWSGNBZWDJCBVTHUDOZGDTRKQNVSIOBGV7YB2TF2UVSPHWZ2XW25PD72GLFZ",
+                "supportedInterfaces": {}
+              },
+              "apiEndpoint": "https://api.eu.amazonalexa.com",
+              "apiAccessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IjEifQ.eyJhdWQiOiJodHRwczovL2FwaS5ldS5hbWF6b25hbGV4YS5jb20iLCJpc3MiOiJBbGV4YVNraWxsS2l0Iiwic3ViIjoiYW16bjEuYXNrLnNraWxsLmQ4NzQ1M2MxLTkzOTAtNDUwZS1hM2U2LTBkM2YxYjg1MjNkYyIsImV4cCI6MTc3Mjk3MTM3OCwiaWF0IjoxNzcyOTcxMzE4LCJuYmYiOjE3NzI5NzEzMTgsInByaXZhdGVDbGFpbXMiOnsiaXNGb3JSQSI6ImZhbHNlIiwiY29udGV4dCI6IkFBQUFBQUFBQVFCeUREcmhOWWVPWUtHYlpLUUNyOERvZHdFQUFBQUFBQUJSWnZRQzNCZE8zdUxBOW9PNjI2WUIzSmh5ay9Xd0ptVEcwZG02Z2R2R3F1WmVWWXg3NnNtMC9JU3JwTHBMdllsR3h3cDNSZjloSXUvaHpFOXhvc3BGcmJTaW16aWZwRS9ublVhbTd2Wm92a1VJQXFJeUlEQStlVlZaTGdtODdQYlI1eVg2NkdXTDlOb2pHQjRra1lPSmwwU09USVFtQnpScXpqNkhQRnlob1V5VkNJQ0lUSzk0VjJYaEl2SWZDQmx4YnRqMlEwV3N3UGZOemNjTEQ5Z2VPdXYxdjlscW9ERFp1dTUxM0hXdXJLRk9zNDltN1VPbHJFU1RmT3dDeWlucG5MTEVkejJTT20yTy9XeGo3dXo4S1FsTDlURFFGaEFES0haSGUya0hvUzN4Nm9QOVJYcE9kL09NckJhaG9NWHp0Mno4YmNteVQzZGdRQ0E4UUNvWG5WOVNJd0VhOXUyZGlQc1hXdlMya0UxdXprZTFpMSt0QzMvK2dRM0lrTDFBUFJBZnBSbjhodUk5WEZOKzBvZEp6L0VOMFZBcjJWdlNFd3M0UDN5RXB0czFpR2pFWUdxNHg0TGp4N0N4ZEVHM2RUS0Y4enYxMWpaM1dNbWhmSzVyUjE5d2ZBNkl3ZzNWODgrUkJxYzV2ckJCdEJJU21HST0iLCJkZXZpY2VJZCI6ImFtem4xLmFzay5kZXZpY2UuQU1BNlNGSFdHUEtZQ0tUV0RESFE1SEZFR1NHRUE3RkoySTdTVkk3UTZIWjUyT1E1VVVKUEVYN1ZXSEU1UFpQNElBTTdKUkFTTVVDSVhDVUZHTlYyN0FESEJVRFVYWlNLREo1WkxHN0dJS0MyTElRUVRPM01aQU9OWExRWllSVFBGQ05BU05JRk1IUE9LWEo1RjJBNFpXU0dOQlpXREpDQlZUSFVET1pHRFRSS1FOVlNJT0JHVjdZQjJURjJVVlNQSFdaMlhXMjVQRDcyR0xGWiIsInVzZXJJZCI6ImFtem4xLmFzay5hY2NvdW50LkFNQVNDVUVONFFDVVpWVEUzQlQ0UjRVMkFJWkZIWkZUNFhETTMzSktaUkVTUjJGVEVTV1E1UUNRSkNCQ1JLVkVKQzZOS0ZHVUNVSkQ0UkJaSUZGTUoyU0IzNTY0TVZHV1VDRVA2RTZMRUpETlRSS0JZUkdESE1VVFFHNEZDUFY3Q0lOSVlJSk9RRTRFQTJIVTdDSlk2Wk5CV0taTVRVWlpXRVFLVEVZRlpJQ0dCV0xUTVZaRFJGT0xZRUdTWDIzUUlMTFU2SEU1TFlSVFJaRFZZTzdSN0ZQMllBT0hTNlE1U1hZQVVIRTVIUSJ9fQ.jcRI48GcJN3TVtw9VztbrHHYMpPudDMWrrUuKCknlVbgjJ28y91aER4_-dBgWkC234BvB7Xkp2U7sPjx5e60hd-ScqoijWeGq1HL0ZqIIZaa0JKHCgwM9Bw4QH-GqbbSLQwGXiZeUDEKG-K7bZQxAXXIbk9YvkWVJy15WbXI3UDj2a-VkrSESnIGuNjb-IM3XxdwbrjxKyG58oqKxcvMeWjBdcGFAW6uxDQrm-159Uqtqaby-aALSjlpdZju3olJ2cz12ILd8RQ9YWjMWu-hS0FzxUO8rmJ2wXs2OxPe8_uuolMDdx8o__acwZDWtxqXMXYQIpPyrtqlasU3LA-kYw"
+            }
+          },
+          "request": {
+            "type": "LaunchRequest",
+            "requestId": "amzn1.echo-api.request.c2dc84cd-425c-42d5-82f5-b78eb4e507ea",
+            "locale": "es-ES",
+            "timestamp": "2026-03-08T12:01:58Z",
+            "shouldLinkResultBeReturned": false
+          }
+        }
+      },
+      "metrics": {
+        "skillExecutionTimeInMilliseconds": 241
+      }
+    },
+    "error": {
+      "message": "Certificate for host 'cozy-nook-ka9o.vercel.app' contains wildcard '*.vercel.app'"
+    }
+  }
+}
