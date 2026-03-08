@@ -26,21 +26,11 @@ function isTimestampValid(timestamp: string): boolean {
   return Math.abs(Date.now() - requestTime) < TIMESTAMP_TOLERANCE_MS;
 }
 
-// Cache en memoria: si Claude falla por créditos, no reintentar durante 10 min
-let claudeUnavailableUntil: number | null = null;
-const CLAUDE_RETRY_COOLDOWN_MS = 10 * 60 * 1000;
-
-function isClaudeAvailable(): boolean {
-  if (!claudeUnavailableUntil) return true;
-  if (Date.now() > claudeUnavailableUntil) {
-    claudeUnavailableUntil = null;
-    return true;
-  }
-  return false;
-}
-
-function markClaudeUnavailable() {
-  claudeUnavailableUntil = Date.now() + CLAUDE_RETRY_COOLDOWN_MS;
+function isCreditsError(message: string): boolean {
+  return (
+    message.includes('credit balance is too low') ||
+    message.includes('Your credit balance')
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -90,31 +80,18 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(buildResponse(fallback.response));
       }
 
-      // 2️⃣ Si Claude está en cooldown por créditos, avisamos
-      if (!isClaudeAvailable()) {
-        return NextResponse.json(
-          buildResponse(
-            'Esta consulta necesita inteligencia artificial, pero la cuenta de Anthropic no tiene créditos disponibles. Recarga el saldo para poder ayudarte.',
-          ),
-        );
-      }
-
-      // 3️⃣ Claude
+      // 2️⃣ Claude
       try {
         const responseText = await handleWithClaude(utterance);
         return NextResponse.json(buildResponse(responseText));
       } catch (error) {
         console.error('[Alexa webhook] Error de Claude:', error);
         const message = error instanceof Error ? error.message : '';
-        const isCreditsError =
-          message.includes('credit balance is too low') ||
-          message.includes('Your credit balance');
 
-        if (isCreditsError) {
-          markClaudeUnavailable();
+        if (isCreditsError(message)) {
           return NextResponse.json(
             buildResponse(
-              'La cuenta de Anthropic se ha quedado sin créditos. Esta consulta necesita IA para procesarse. Por favor, recarga el saldo.',
+              'La cuenta de Anthropic se ha quedado sin créditos. Por favor, recarga el saldo en la consola de Anthropic.',
             ),
           );
         }

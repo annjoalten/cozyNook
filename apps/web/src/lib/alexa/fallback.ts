@@ -157,6 +157,46 @@ export async function handleWithFallback(utterance: string): Promise<FallbackRes
     };
   }
 
+  // ── Buscar item por nombre ────────────────────────────────────────────────
+  // Cubre: "dónde está X", "dónde están X", "busca X", "tienes X", etc.
+
+  const searchMatch =
+    text.match(/^(?:d[oó]nde est[áa]n?|busca|encuentra|tienes?|hay)\s+(?:el |la |los |las |un |una |unos |unas )?(.+)$/) ??
+    text.match(/^(.+?)\s+d[oó]nde est[áa]$/);
+
+  if (searchMatch) {
+    const query = searchMatch[1].trim();
+    const { data } = await supabase
+      .from('items')
+      .select('name, room, spot')
+      .or(`name.ilike.%${query}%,description.ilike.%${query}%,tags.cs.{${query}}`)
+      .limit(3);
+
+    if (!data || data.length === 0) {
+      return {
+        handled: true,
+        response: `No encontré "${query}" en el inventario. Asegúrate de que esté guardado en cozyNook.`,
+      };
+    }
+
+    if (data.length === 1) {
+      const item = data[0];
+      const ubicacion = item.spot ? `en ${item.room}, ${item.spot}` : `en ${item.room}`;
+      return {
+        handled: true,
+        response: `${item.name} está ${ubicacion}.`,
+      };
+    }
+
+    const lista = data
+      .map((i) => `${i.name} en ${i.room}${i.spot ? `, ${i.spot}` : ''}`)
+      .join('. ');
+    return {
+      handled: true,
+      response: `Encontré ${data.length} coincidencias: ${lista}.`,
+    };
+  }
+
   return { handled: false };
 }
 
