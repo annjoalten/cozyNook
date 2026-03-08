@@ -32,10 +32,10 @@
             }
           ],
           "samples": [
-            "dime {consulta}",
-            "pregunta {consulta}",
-            "consulta {consulta}",
-            "anota {consulta}"
+            "nook dime {consulta}",
+            "nook apunta {consulta}",
+            "nook busca {consulta}",
+            "nook lista {consulta}"
           ]
         }
       ],

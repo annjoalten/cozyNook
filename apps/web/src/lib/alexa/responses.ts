@@ -19,10 +19,10 @@ export function buildResponse(
 }
 
 export const WELCOME = buildResponse(
-  'Hola! Soy nook. Di "dime" seguido de tu pregunta. Por ejemplo: dime dónde están mis llaves, o dime mi lista de compras.',
+  'Hola! Soy nook. Di "nook dime" seguido de tu pregunta. Por ejemplo: nook dime dónde están mis llaves, o nook lista mis compras.',
   {
     endSession: false,
-    reprompt: 'Di "dime" seguido de tu consulta. Por ejemplo: dime mis préstamos.',
+    reprompt: 'Di "nook dime" seguido de tu consulta. Por ejemplo: nook dime mis préstamos.',
   },
 );
 
